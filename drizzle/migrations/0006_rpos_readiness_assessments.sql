@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS public.readiness_domain_assessments (
   updated_by uuid REFERENCES auth.users(id),
   updated_at timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY (project_id, domain_id),
-  CHECK (length(evidence_notes) <= 4000)
+  CHECK (length(evidence_notes) <= 4000),
+  CHECK (NOT evidence_verified OR length(btrim(evidence_notes)) > 0)
 );
 ALTER TABLE public.readiness_domain_assessments ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON public.readiness_domain_assessments FROM PUBLIC, anon;
@@ -55,6 +56,9 @@ BEGIN
   END IF;
   IF p_score IS NOT NULL AND (p_score < 0 OR p_score > 5 OR p_score * 2 <> trunc(p_score * 2)) THEN
     RAISE EXCEPTION 'Score must be 0 to 5 in half-point steps' USING ERRCODE = '22023';
+  END IF;
+  IF coalesce(p_evidence_verified, false) AND btrim(coalesce(p_evidence_notes, '')) = '' THEN
+    RAISE EXCEPTION 'Evidence reference notes are required for verification' USING ERRCODE = '22023';
   END IF;
   IF length(coalesce(p_evidence_notes, '')) > 4000 THEN
     RAISE EXCEPTION 'Evidence notes too long' USING ERRCODE = '22023';
