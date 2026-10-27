@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { evaluateReadiness, type ReadinessDomainInput } from "./readiness-engine";
+import { DOMAINS } from "./config";
 const base = (score = 4): ReadinessDomainInput[] =>
   Array.from({ length: 14 }, (_, i) => ({
     id: `D${String(i + 1).padStart(2, "0")}`,
@@ -10,6 +11,11 @@ const base = (score = 4): ReadinessDomainInput[] =>
   }));
 
 describe("readiness recommendations", () => {
+  it("keeps the configured fourteen domains at exactly 100% total weight", () => {
+    expect(DOMAINS).toHaveLength(14);
+    expect(new Set(DOMAINS.map((domain) => domain.id)).size).toBe(14);
+    expect(DOMAINS.reduce((sum, domain) => sum + domain.weight, 0)).toBe(100);
+  });
   it("recommends GO for fully verified high scores but requires approval", () => {
     const result = evaluateReadiness(base());
     expect(result).toMatchObject({ overall: 80, result: "GO", requiresHumanApproval: true });
