@@ -22,6 +22,13 @@
       "when": 1793135075946,
       "tag": "0002_grant_authenticated_select_rpos",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793135486135,
+      "tag": "0003_rpos_write_rpcs",
+      "breakpoints": true
     }
   ]
 }

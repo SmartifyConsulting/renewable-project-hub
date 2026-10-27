@@ -16,3 +16,17 @@ describe("auth config", () => {
     expect(membershipState(0, 1)).toBe("has-access");
   });
 });
+
+import { canWriteOrg, mapRpcError } from "./auth-config";
+describe("write permissions", () => {
+  it("allows only admin, director and manager org roles to write", () => {
+    expect(["admin", "director", "manager"].every(canWriteOrg)).toBe(true);
+    expect(canWriteOrg("member")).toBe(false);
+    expect(canWriteOrg("viewer")).toBe(false);
+    expect(canWriteOrg(undefined)).toBe(false);
+  });
+  it("shows database validation messages but hides unknown errors", () => {
+    expect(mapRpcError({ code: "22023", message: "Name is required" })).toBe("Name is required");
+    expect(mapRpcError({ code: "XX000", message: "internal detail" })).toBe("Could not save. Please try again.");
+  });
+});

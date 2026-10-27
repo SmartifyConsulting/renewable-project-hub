@@ -454,7 +454,82 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      rpos_upsert_portfolio: {
+        Args: {
+          p_description?: string
+          p_geography?: string
+          p_id: string
+          p_name: string
+          p_org_id: string
+          p_owner?: string
+          p_status?: string
+          p_technology?: string
+        }
+        Returns: {
+          created_at: string
+          description: string
+          geography: string
+          id: string
+          name: string
+          org_id: string
+          owner: string
+          status: string
+          technology: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "portfolios"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      rpos_upsert_project: {
+        Args: {
+          p_budget?: number
+          p_capacity?: string
+          p_cod?: string
+          p_country?: string
+          p_id: string
+          p_name: string
+          p_objective?: string
+          p_portfolio_id: string
+          p_region?: string
+          p_stage?: string
+          p_status?: string
+          p_technology?: string
+        }
+        Returns: {
+          activation_day: number
+          budget: number
+          capacity: string
+          cod: string | null
+          country: string
+          cpi: number
+          created_at: string
+          director: string
+          epc: string
+          id: string
+          manager: string
+          name: string
+          objective: string
+          offtaker: string
+          portfolio_id: string | null
+          region: string
+          spent: number
+          spi: number
+          stage: string
+          status: string
+          technology: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "projects"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       [_ in never]: never
