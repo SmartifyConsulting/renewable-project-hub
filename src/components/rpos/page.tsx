@@ -122,4 +122,4 @@ export function Field({ label, children }: { label: string; children: ReactNode 
   );
 }
 
-export const searchView = (s: Record<string, unknown>) => ({ view: typeof s.view === "string" ? s.view : undefined });
+export const searchView = (s: Record<string, unknown>): { view?: string } => (typeof s.view === "string" ? { view: s.view } : {});
