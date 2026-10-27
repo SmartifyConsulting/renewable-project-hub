@@ -1,4 +1,6 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Copy, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -34,4 +36,15 @@ export function UserIdBadge({ id }: { id: string }) {
       <Button size="sm" variant="ghost" aria-label="Copy user ID" onClick={() => navigator.clipboard.writeText(id).then(() => toast.success("Copied"))}><Copy className="size-3.5" /></Button>
     </div>
   );
+}
+
+export function useSignOut() {
+  const qc = useQueryClient();
+  const navigate = useNavigate();
+  return async () => {
+    await qc.cancelQueries();
+    qc.clear();
+    await supabase.auth.signOut();
+    navigate({ to: "/auth", replace: true });
+  };
 }
