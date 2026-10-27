@@ -18,7 +18,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   useEffect(() => setMobileOpen(false), [loc.pathname, loc.searchStr]);
   return (
     <div className="flex min-h-screen bg-background">
-      <aside className={cn("fixed inset-y-0 left-0 z-40 w-64 shrink-0 bg-sidebar text-sidebar-foreground transition-transform lg:sticky lg:top-0 lg:h-screen lg:translate-x-0", mobileOpen ? "translate-x-0" : "-translate-x-full")}>
+      <aside className={cn("fixed inset-y-0 left-0 z-40 w-[min(19rem,85vw)] shrink-0 overflow-x-hidden lg:w-76 bg-sidebar text-sidebar-foreground transition-transform lg:sticky lg:top-0 lg:h-screen lg:translate-x-0", mobileOpen ? "translate-x-0" : "-translate-x-full")}>
         <SideNav onClose={() => setMobileOpen(false)} />
       </aside>
       {mobileOpen && <button aria-label="Close navigation" className="fixed inset-0 z-30 bg-navy/50 lg:hidden" onClick={() => setMobileOpen(false)} />}
@@ -51,7 +51,7 @@ function SideNav({ onClose }: { onClose: () => void }) {
         </Link>
         <button className="lg:hidden" aria-label="Close" onClick={onClose}><X className="size-4" /></button>
       </div>
-      <nav aria-label="Main" className="flex-1 overflow-y-auto px-2 py-3">
+      <nav aria-label="Main" className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden px-2 pb-3 pt-3 lg:pt-10">
         {NAV.map((n, i) => {
           const allowed = user.modules.includes(n.id);
           const active = activeId === n.id;
@@ -66,7 +66,7 @@ function SideNav({ onClose }: { onClose: () => void }) {
           return (
             <div key={n.id}>
               <div className={cn("flex items-center rounded-md", active ? "bg-sidebar-accent text-sidebar-accent-foreground" : "hover:bg-sidebar-accent/60")}>
-                <Link to={n.to} className="flex flex-1 items-center gap-2.5 px-2.5 py-1.5 text-[13px] font-medium">
+                <Link to={n.to} className="flex min-w-0 flex-1 items-center gap-2.5 px-2.5 py-1.5 text-[13px] font-medium">
                   <span className="w-4 text-[10px] tabular-nums text-sidebar-foreground/50">{i + 1}</span>
                   <Icon className={cn("size-4", active && "text-sidebar-primary")} />
                   <span className="truncate">{n.label}</span>
