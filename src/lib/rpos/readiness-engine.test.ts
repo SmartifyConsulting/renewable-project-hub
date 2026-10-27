@@ -25,41 +25,41 @@ describe("readiness recommendations", () => {
   });
   it("blocks GO when a hard stop exists", () => {
     const domains = base();
-    domains[0].hardStop = true;
+    domains[0]!.hardStop = true;
     expect(evaluateReadiness(domains).result).toBe("NO-GO");
   });
   it("blocks GO when evidence is not verified", () => {
     const domains = base();
-    domains[0].evidenceVerified = false;
+    domains[0]!.evidenceVerified = false;
     expect(evaluateReadiness(domains).result).toBe("NO-GO");
   });
   it("returns incomplete for missing, invalid or duplicate domains", () => {
     expect(evaluateReadiness(base().slice(1)).result).toBe("INCOMPLETE");
     const invalid = base();
-    invalid[0].score = 6;
+    invalid[0]!.score = 6;
     expect(evaluateReadiness(invalid).result).toBe("INCOMPLETE");
     const duplicates = base();
-    duplicates[0].id = duplicates[1].id;
+    duplicates[0]!.id = duplicates[1]!.id;
     expect(evaluateReadiness(duplicates).result).toBe("INCOMPLETE");
   });
   it("rejects unrecognised domain identifiers", () => {
     const domains = base();
-    domains[0].id = "D99";
+    domains[0]!.id = "D99";
     expect(evaluateReadiness(domains).result).toBe("INCOMPLETE");
   });
   it("does not recommend GO with a low-scoring critical domain", () => {
     const domains = base();
-    domains[0].score = 1;
+    domains[0]!.score = 1;
     expect(evaluateReadiness(domains).result).toBe("CONDITIONAL GO");
   });
   it("does not treat an unscored domain as zero", () => {
     const domains = base();
-    domains[0].score = null;
+    domains[0]!.score = null;
     expect(evaluateReadiness(domains)).toMatchObject({ result: "INCOMPLETE", overall: null });
   });
   it("rejects scores outside the database half-point increments", () => {
     const domains = base();
-    domains[0].score = 3.7;
+    domains[0]!.score = 3.7;
     expect(evaluateReadiness(domains)).toMatchObject({ result: "INCOMPLETE", overall: null });
   });
   it("does not approve a gate automatically", () => {

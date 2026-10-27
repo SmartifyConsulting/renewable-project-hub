@@ -75,7 +75,7 @@ function AssurancePage(){
     <Button disabled={saving||!selected||!inspection.date} onClick={addInspection}>Save inspection</Button>
    </section>}
    {canWrite&&inspections.length>0&&<section className="space-y-3 rounded border p-4"><h2 className="font-semibold">Raise non-conformance report</h2>
-    <label className="block text-xs">Inspection <select className="w-full rounded border bg-background p-2" value={ncr.inspectionId||inspections[0].id} onChange={e=>setNcr({...ncr,inspectionId:e.target.value})}>
+    <label className="block text-xs">Inspection <select className="w-full rounded border bg-background p-2" value={ncr.inspectionId||inspections[0]?.id} onChange={e=>setNcr({...ncr,inspectionId:e.target.value})}>
      {inspections.map(i=><option key={i.id} value={i.id}>{i.reference} — {i.title}</option>)}</select></label>
     <Input aria-label="NCR reference" placeholder="NCR reference" value={ncr.reference} onChange={e=>setNcr({...ncr,reference:e.target.value})}/>
     <Textarea aria-label="NCR description" placeholder="Non-conformance description" value={ncr.description} onChange={e=>setNcr({...ncr,description:e.target.value})}/>
