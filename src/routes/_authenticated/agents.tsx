@@ -14,30 +14,32 @@ const db=supabase as any;
 type Agent={agent_key:string;name:string;domain:string;purpose:string;enabled:boolean};
 type Recommendation={id:string;project_id:string;agent_key:string;title:string;recommendation:string;source_references:string;status:string;created_by:string;review_rationale:string|null};
 async function load(userId:string){
- const [projects,portfolios,memberships,agents,recommendations]=await Promise.all([
+ const [projects,portfolios,memberships,agents,recommendations,settings]=await Promise.all([
  supabase.from("projects").select("id,name,portfolio_id").order("name"),
  supabase.from("portfolios").select("id,org_id"),
  supabase.from("organisation_memberships").select("organisation_id,role").eq("user_id",userId),
  db.from("rpos_ai_agents").select("agent_key,name,domain,purpose,enabled").order("name"),
- db.from("rpos_ai_recommendations").select("id,project_id,agent_key,title,recommendation,source_references,status,created_by,review_rationale").order("created_at",{ascending:false})
+ db.from("rpos_ai_recommendations").select("id,project_id,agent_key,title,recommendation,source_references,status,created_by,review_rationale").order("created_at",{ascending:false}),
+ db.from("rpos_ai_agent_settings").select("organisation_id,agent_key,enabled")
  ]);
- const error=projects.error??portfolios.error??memberships.error??agents.error??recommendations.error;
+ const error=projects.error??portfolios.error??memberships.error??agents.error??recommendations.error??settings.error;
  if(error)throw error;
- return {projects:projects.data??[],portfolios:portfolios.data??[],memberships:memberships.data??[],agents:(agents.data??[]) as Agent[],recommendations:(recommendations.data??[]) as Recommendation[]};
+ return {projects:projects.data??[],portfolios:portfolios.data??[],memberships:memberships.data??[],agents:(agents.data??[]) as Agent[],recommendations:(recommendations.data??[]) as Recommendation[],settings:(settings.data??[]) as {organisation_id:string;agent_key:string;enabled:boolean}[]};
 }
 function AgentsPage(){
  const {user}=Route.useRouteContext();const signOut=useSignOut();const qc=useQueryClient();
  const query=useQuery({queryKey:["agents",user.id],queryFn:()=>load(user.id)});
  const [projectId,setProjectId]=useState("");const [saving,setSaving]=useState(false);
  const [form,setForm]=useState({agent_key:"",title:"",recommendation:"",sources:""});
- const [reviewId,setReviewId]=useState<string|null>(null);const [rationale,setRationale]=useState("");
+ const [activationReason,setActivationReason]=useState("");const [reviewId,setReviewId]=useState<string|null>(null);const [rationale,setRationale]=useState("");
  const data=query.data;const selected=projectId||data?.projects[0]?.id||"";
  const org=data?.portfolios.find(p=>p.id===data.projects.find(x=>x.id===selected)?.portfolio_id)?.org_id;
  const canWrite=data?.memberships.some(m=>m.organisation_id===org&&canWriteOrg(m.role))??false;
  const canReview=data?.memberships.some(m=>m.organisation_id===org&&["admin","director"].includes(m.role))??false;
  const recommendations=data?.recommendations.filter(r=>r.project_id===selected)??[];
- const enabled=data?.agents.filter(a=>a.enabled)??[];
+ const enabled=data?.agents.filter(a=>data.settings.some(s=>s.organisation_id===org&&s.agent_key===a.agent_key&&s.enabled))??[];
  async function execute(task:()=>Promise<void>){setSaving(true);try{await task();await qc.invalidateQueries({queryKey:["agents",user.id]});toast.success("Recommendation workflow updated");}catch(e){toast.error(mapRpcError(e));}finally{setSaving(false);}}
+ async function toggleAgent(key:string,value:boolean){if(!org)return;await execute(async()=>{const {error}=await db.rpc("rpos_set_org_ai_agent",{p_org_id:org,p_agent_key:key,p_enabled:value,p_reason:activationReason});if(error)throw error;setActivationReason("");});}
  async function submit(){await execute(async()=>{const {error}=await db.rpc("rpos_submit_ai_recommendation",{p_project_id:selected,p_agent_key:form.agent_key||enabled[0]?.agent_key,p_title:form.title,p_recommendation:form.recommendation,p_sources:form.sources});if(error)throw error;setForm({agent_key:"",title:"",recommendation:"",sources:""});});}
  async function review(id:string,decision:"approved"|"rejected"){await execute(async()=>{const {error}=await db.rpc("rpos_review_ai_recommendation",{p_id:id,p_decision:decision,p_rationale:rationale});if(error)throw error;setReviewId(null);setRationale("");});}
  return <div className="min-h-screen bg-background"><WorkspaceHeader email={user.email} onSignOut={signOut}/>
@@ -50,9 +52,10 @@ function AgentsPage(){
    <label className="text-sm">Project <select className="rounded border bg-background p-2" value={selected} onChange={e=>setProjectId(e.target.value)}>
     {data.projects.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></label>
    <section className="space-y-2"><h2 className="font-semibold">Specialist agent catalogue ({data.agents.length})</h2>
+    {canReview&&<Input aria-label="Activation rationale" placeholder="Reason for enabling or disabling an agent (at least 10 characters)" value={activationReason} onChange={e=>setActivationReason(e.target.value)}/>}
     <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{data.agents.map(a=><div key={a.agent_key} className="rounded border p-3">
-     <strong className="text-sm">{a.name}</strong><p className="text-xs text-muted-foreground">{a.domain} · {a.enabled?"Enabled":"Disabled"}</p>
-     <p className="mt-1 text-xs">{a.purpose}</p></div>)}</div>
+     <strong className="text-sm">{a.name}</strong><p className="text-xs text-muted-foreground">{a.domain} · {data.settings.some(s=>s.organisation_id===org&&s.agent_key===a.agent_key&&s.enabled)?"Enabled":"Disabled"}</p>
+     <p className="mt-1 text-xs">{a.purpose}</p>{canReview&&<Button size="sm" variant="outline" disabled={saving||activationReason.trim().length<10} onClick={()=>toggleAgent(a.agent_key,!data.settings.some(s=>s.organisation_id===org&&s.agent_key===a.agent_key&&s.enabled))}>{data.settings.some(s=>s.organisation_id===org&&s.agent_key===a.agent_key&&s.enabled)?"Disable for organisation":"Enable for organisation"}</Button>}</div>)}</div>
    </section>
    {canWrite&&<section className="space-y-3 rounded border p-4"><h2 className="font-semibold">Submit sourced recommendation</h2>
     {enabled.length===0?<p className="text-sm text-muted-foreground">All agents are disabled by default. An administrator must enable an agent before recommendations can be submitted.</p>:<>
