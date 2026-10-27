@@ -35,7 +35,7 @@ export const extractDocumentCandidates = createServerFn({ method: "POST" })
   const { data: file, error: downloadError } = await db.storage.from("rpos-knowledge").download(objectPath);
   if (downloadError || !file) throw new Error("Document unavailable or access denied");
   if (file.size > 8 * 1024 * 1024) throw new Error("AI document extraction supports files up to 8 MiB");
-  if (file.size < 5) throw new Error("Empty or invalid PDF");
+  if (file.size < 5) throw new Error("Empty or invalid document");
   const bytes = Buffer.from(await file.arrayBuffer());
   if (extension==="pdf" && bytes.subarray(0,5).toString("ascii") !== "%PDF-") throw new Error("Invalid PDF content");
   if (extension==="docx" && bytes.subarray(0,2).toString("ascii") !== "PK") throw new Error("Invalid DOCX content");
@@ -73,7 +73,7 @@ export const extractDocumentCandidates = createServerFn({ method: "POST" })
     const excerpt=typeof row.excerpt==="string"?row.excerpt.trim():"";
     const page=typeof row.page==="string"?row.page.trim():"";
     if (key.length<2||key.length>120||!value||value.length>4000||!excerpt||excerpt.length>3500) continue;
-    const signature=key.toLowerCase()+"\\u0000"+value.toLowerCase();
+    const signature=key.toLowerCase()+"\u0000"+value.toLowerCase();
     if(seen.has(signature))continue;
     seen.add(signature);
     candidates.push({key,value,excerpt,page:page.slice(0,40)});
