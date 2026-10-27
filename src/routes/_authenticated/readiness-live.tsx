@@ -55,7 +55,7 @@ async function load(userId: string) {
 
 function DomainEditor({ projectId, domain, record, canEdit, sources, links, onSaved }: {
   sources: EvidenceSource[]; links: EvidenceLink[];
-  projectId: string; domain: (typeof DOMAINS)[number]; record?: Assessment;
+  projectId: string; domain: (typeof DOMAINS)[number]; record?: Assessment | undefined;
   canEdit: boolean; onSaved: () => Promise<unknown>;
 }) {
   const [score, setScore] = useState(record?.score == null ? "" : String(record.score));
@@ -209,10 +209,10 @@ function LiveReadiness() {
           </label>
         )}
         {visibleProjects.map((project) => {
-          const orgId = data.portfolios.find((p) => p.id === project.portfolio_id)?.org_id;
-          const canEdit = data.memberships.some((m) => m.organisation_id === orgId && canWriteOrg(m.role));
-          const canDecide = data.memberships.some((m) => m.organisation_id === orgId && ["admin", "director"].includes(m.role));
-          const records = data.assessments.filter((a) => a.project_id === project.id);
+          const orgId = data!.portfolios.find((p) => p.id === project.portfolio_id)?.org_id;
+          const canEdit = data!.memberships.some((m) => m.organisation_id === orgId && canWriteOrg(m.role));
+          const canDecide = data!.memberships.some((m) => m.organisation_id === orgId && ["admin", "director"].includes(m.role));
+          const records = data!.assessments.filter((a) => a.project_id === project.id);
           const completedCount = DOMAINS.filter((domain) => records.some((a) => a.domain_id === domain.id && a.score !== null)).length;
           const verifiedCount = DOMAINS.filter((domain) => records.some((a) => a.domain_id === domain.id && a.evidence_verified)).length;
           const hardStopCount = records.filter((a) => a.hard_stop).length;
@@ -241,14 +241,14 @@ function LiveReadiness() {
                   <DomainEditor key={`${project.id}:${domain.id}:${JSON.stringify(records.find((a) => a.domain_id === domain.id) ?? null)}`}
                     projectId={project.id} domain={domain}
                     record={records.find((a) => a.domain_id === domain.id)}
-                    sources={data.sources.filter(s => s.project_id === project.id)}
-                    links={data.links.filter(l => l.project_id === project.id && l.domain_id === domain.id)}
+                    sources={data!.sources.filter(s => s.project_id === project.id)}
+                    links={data!.links.filter(l => l.project_id === project.id && l.domain_id === domain.id)}
                     canEdit={canEdit}
                     onSaved={() => qc.invalidateQueries({ queryKey: ["readiness-live", user.id] })} />
                 ))}
               </div>
               <GatePanel projectId={project.id} canDecide={canDecide}
-                decisions={data.gates.filter((g) => g.project_id === project.id)}
+                decisions={data!.gates.filter((g) => g.project_id === project.id)}
                 onSaved={() => qc.invalidateQueries({ queryKey: ["readiness-live", user.id] })} />
             </section>
           );
