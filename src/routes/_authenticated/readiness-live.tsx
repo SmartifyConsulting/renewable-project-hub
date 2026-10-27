@@ -60,6 +60,7 @@ function DomainEditor({ projectId, domain, record, canEdit, onSaved }: {
       return;
     }
     if (notes.length > 4000) { toast.error("Notes must be 4,000 characters or fewer."); return; }
+    if (verified && !notes.trim()) { toast.error("Document the evidence reference before marking it verified."); return; }
     setSaving(true);
     try {
       const { error } = await readinessDb.rpc("rpos_save_readiness_domain", {
@@ -144,7 +145,7 @@ function LiveReadiness() {
               </div>
               <div className="mt-3">
                 {DOMAINS.map((domain) => (
-                  <DomainEditor key={`${project.id}:${domain.id}:${records.find((a) => a.domain_id === domain.id)?.score ?? "none"}:${records.find((a) => a.domain_id === domain.id)?.evidence_notes ?? ""}`}
+                  <DomainEditor key={`${project.id}:${domain.id}:${JSON.stringify(records.find((a) => a.domain_id === domain.id) ?? null)}`}
                     projectId={project.id} domain={domain}
                     record={records.find((a) => a.domain_id === domain.id)}
                     canEdit={canEdit}
