@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 const LINKS = [
   { to: "/workspace", label: "Projects" },
   { to: "/members", label: "Members" },
+  { to: "/readiness-live", label: "Readiness" },
   { to: "/audit", label: "Audit history" },
 ] as const;
 
