@@ -99,7 +99,7 @@ function Workspace() {
                   <h1 className="font-display text-2xl font-semibold">Portfolios</h1>
                   {writableOrgs.length === 0 && <p className="text-xs text-muted-foreground">Read-only: editing needs an admin, director or manager role.</p>}
                 </div>
-                {writableOrgs.length > 0 && <Button size="sm" onClick={() => setPfEdit({ org_id: writableOrgs[0], status: "Active" })}><Plus className="size-4" /> New portfolio</Button>}
+                {writableOrgs.length > 0 && <Button size="sm" onClick={() => setPfEdit({ org_id: writableOrgs[0] ?? "", status: "Active" })}><Plus className="size-4" /> New portfolio</Button>}
               </div>
               <Table heads={["Portfolio", "Organisation", "Owner", "Geography", "Status", ""]} empty={d.portfolios.length === 0}>
                 {d.portfolios.map((p) => (
@@ -114,7 +114,7 @@ function Workspace() {
             <section>
               <div className="mb-3 flex items-end justify-between">
                 <h2 className="font-display text-2xl font-semibold">Projects</h2>
-                {writablePortfolios.length > 0 && <Button size="sm" onClick={() => setPrEdit({ portfolio_id: writablePortfolios[0].id, technology: "Solar PV", status: "Active", country: "South Africa", stage: "Origination", budget: 0 })}><Plus className="size-4" /> New project</Button>}
+                {writablePortfolios.length > 0 && <Button size="sm" onClick={() => setPrEdit({ portfolio_id: writablePortfolios[0]?.id ?? "", technology: "Solar PV", status: "Active", country: "South Africa", stage: "Origination", budget: 0 })}><Plus className="size-4" /> New project</Button>}
               </div>
               <Table heads={["Project", "Portfolio", "Technology", "Capacity", "Location", "Stage", "Status", "COD", ""]} empty={d.projects.length === 0}>
                 {d.projects.map((p) => (
