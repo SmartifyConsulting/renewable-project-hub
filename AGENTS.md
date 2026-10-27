@@ -14,3 +14,4 @@
 - Store project fields in snake_case matching the RPOS Project model; defer the portfolio foreign key until its table exists so this table can be created independently.
 - Real customer data lives only under `/workspace` (Supabase email auth, `_authenticated` gate, read-only via RLS SELECT grants); the root `AppShell` demo with mock data and role selector must never read real records nor be presented as authentication.
 - Memberships are admin-provisioned; never auto-create memberships or grant client writes.
+- Portfolio/project writes go only through SECURITY DEFINER RPCs (`rpos_upsert_portfolio`, `rpos_upsert_project`) that check auth.uid() + org role admin/director/manager and append an audit_events row; clients keep SELECT-only table grants.
