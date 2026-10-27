@@ -37,6 +37,27 @@ async function load(f: Filters, page: number) {
   return { rows: (data ?? []).slice(0, PAGE_SIZE), hasNext: (data ?? []).length > PAGE_SIZE };
 }
 
+function csvCell(value: unknown): string {
+  const raw = value == null ? "" : typeof value === "string" ? value : JSON.stringify(value);
+  // Prevent spreadsheet formula execution when an audit export is opened in Excel.
+  const safe = /^[\\s]*[=+@\\-]/.test(raw) ? "'" + raw : raw;
+  return '"' + safe.replace(/"/g, '""') + '"';
+}
+
+function exportPage(rows: Awaited<ReturnType<typeof load>>["rows"]) {
+  const columns = ["Timestamp (UTC)", "Entity type", "Action", "Entity ID", "Actor user ID", "Organisation ID", "Project ID", "Before (JSON)", "After (JSON)"];
+  const records = rows.map((e) => [e.occurred_at, e.entity_type, e.action, e.entity_id, e.actor_user_id, e.organisation_id, e.project_id, e.before_state, e.after_state]);
+  const csv = [columns, ...records].map((line) => line.map(csvCell).join(",")).join("\\r\\n");
+  const url = URL.createObjectURL(new Blob(["\\uFEFF", csv], { type: "text/csv;charset=utf-8" }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "rpos-audit-page-" + new Date().toISOString().slice(0, 10) + ".csv";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
 function Audit() {
   const { user } = Route.useRouteContext();
   const signOut = useSignOut();
@@ -61,7 +82,10 @@ function Audit() {
           <Input aria-label="From date" type="date" className="h-8 w-40 text-xs" value={f.from} onChange={(e) => updateFilters({ ...f, from: e.target.value })} />
           <Input aria-label="To date" type="date" className="h-8 w-40 text-xs" value={f.to} onChange={(e) => updateFilters({ ...f, to: e.target.value })} />
         </div>
-        <p className="text-xs text-muted-foreground">Showing up to {PAGE_SIZE} entries per page, newest first. Filters apply across the full audit history.</p>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-xs text-muted-foreground">Showing up to {PAGE_SIZE} entries per page, newest first. Filters apply across the full audit history.</p>
+          <button type="button" className="rounded border px-3 py-1.5 text-xs disabled:opacity-40" disabled={!q.data?.rows.length || q.isFetching} onClick={() => q.data && exportPage(q.data.rows)}>Export this page (CSV)</button>
+        </div>
         {q.isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
         {q.error && <p role="alert" className="text-sm text-destructive">Could not load audit history.</p>}
         {q.data && (
