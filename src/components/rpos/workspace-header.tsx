@@ -17,6 +17,7 @@ const LINKS = [
   { to: "/assurance", label: "Assurance" },
   { to: "/executive", label: "Executive" },
   { to: "/agents", label: "AI Agents" },
+  { to: "/agent-evidence", label: "Evidence Brief" },
   { to: "/audit", label: "Audit history" },
 ] as const;
 
