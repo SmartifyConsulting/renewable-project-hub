@@ -19,6 +19,9 @@ export function evaluateReadiness(domains: ReadinessDomainInput[]): ReadinessRec
   if (domains.length !== 14 || new Set(domains.map((d) => d.id)).size !== 14) {
     reasons.push("All fourteen unique domains must be assessed.");
   }
+  if (domains.some((d) => !/^D(0[1-9]|1[0-4])$/.test(d.id))) {
+    reasons.push("Domain identifiers must be D01 through D14.");
+  }
   if (domains.some((d) => !Number.isFinite(d.weight) || d.weight <= 0) ||
       Math.abs(domains.reduce((sum, d) => sum + d.weight, 0) - 100) > 0.0001) {
     reasons.push("Domain weights must be positive and total 100%.");
