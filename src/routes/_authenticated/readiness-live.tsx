@@ -110,6 +110,8 @@ function LiveReadiness() {
   const qc = useQueryClient();
   const query = useQuery({ queryKey: ["readiness-live", user.id], queryFn: () => load(user.id) });
   const data = query.data;
+  const [selectedProject, setSelectedProject] = useState<string>("");
+  const visibleProjects = data?.projects.filter((p) => !selectedProject || p.id === selectedProject) ?? [];
   return (
     <div className="min-h-screen bg-background">
       <WorkspaceHeader email={user.email} onSignOut={signOut} />
@@ -124,10 +126,22 @@ function LiveReadiness() {
           Could not load assessments. The readiness database migration may not yet be applied.
         </p>}
         {data && data.projects.length === 0 && <p className="rounded-md border p-4 text-sm">No accessible projects.</p>}
-        {data?.projects.map((project) => {
+        {data && data.projects.length > 0 && (
+          <label className="block max-w-lg text-sm font-medium">Project
+            <select aria-label="Filter readiness by project" className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm"
+              value={selectedProject} onChange={(e) => setSelectedProject(e.target.value)}>
+              <option value="">All accessible projects</option>
+              {data.projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+          </label>
+        )}
+        {visibleProjects.map((project) => {
           const orgId = data.portfolios.find((p) => p.id === project.portfolio_id)?.org_id;
           const canEdit = data.memberships.some((m) => m.organisation_id === orgId && canWriteOrg(m.role));
           const records = data.assessments.filter((a) => a.project_id === project.id);
+          const completedCount = DOMAINS.filter((domain) => records.some((a) => a.domain_id === domain.id && a.score !== null)).length;
+          const verifiedCount = DOMAINS.filter((domain) => records.some((a) => a.domain_id === domain.id && a.evidence_verified)).length;
+          const hardStopCount = records.filter((a) => a.hard_stop).length;
           const assessment = evaluateReadiness(DOMAINS.map((domain) => {
             const found = records.find((a) => a.domain_id === domain.id);
             return { id: domain.id, weight: domain.weight, score: found?.score ?? null,
@@ -137,6 +151,11 @@ function LiveReadiness() {
             <section key={project.id} className="rounded-lg border bg-card p-4">
               <h2 className="font-display text-lg font-semibold">{project.name}</h2>
               <p className="text-xs text-muted-foreground">Stage: {project.stage} · {canEdit ? "Editor" : "Read-only"}</p>
+              <div className="mt-3 grid gap-2 sm:grid-cols-3" aria-label="Assessment progress">
+                <div className="rounded-md border p-3 text-sm"><strong>{completedCount}/14</strong><p className="text-xs text-muted-foreground">Domains scored</p></div>
+                <div className="rounded-md border p-3 text-sm"><strong>{verifiedCount}/14</strong><p className="text-xs text-muted-foreground">Evidence flags verified</p></div>
+                <div className="rounded-md border p-3 text-sm"><strong>{hardStopCount}</strong><p className="text-xs text-muted-foreground">Open hard stops</p></div>
+              </div>
               <div className="mt-3 rounded-md bg-muted/50 p-3 text-sm">
                 <strong>Recommendation: {assessment.result}</strong>
                 <span className="ml-3">Weighted score: {assessment.overall === null ? "Incomplete" : `${assessment.overall}%`}</span>
