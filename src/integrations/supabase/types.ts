@@ -14,7 +14,81 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      projects: {
+        Row: {
+          activation_day: number
+          budget: number
+          capacity: string
+          cod: string | null
+          country: string
+          cpi: number
+          created_at: string
+          director: string
+          epc: string
+          id: string
+          manager: string
+          name: string
+          objective: string
+          offtaker: string
+          portfolio_id: string | null
+          region: string
+          spent: number
+          spi: number
+          stage: string
+          status: string
+          technology: string
+          updated_at: string
+        }
+        Insert: {
+          activation_day?: number
+          budget?: number
+          capacity?: string
+          cod?: string | null
+          country?: string
+          cpi?: number
+          created_at?: string
+          director?: string
+          epc?: string
+          id?: string
+          manager?: string
+          name: string
+          objective?: string
+          offtaker?: string
+          portfolio_id?: string | null
+          region?: string
+          spent?: number
+          spi?: number
+          stage?: string
+          status?: string
+          technology?: string
+          updated_at?: string
+        }
+        Update: {
+          activation_day?: number
+          budget?: number
+          capacity?: string
+          cod?: string | null
+          country?: string
+          cpi?: number
+          created_at?: string
+          director?: string
+          epc?: string
+          id?: string
+          manager?: string
+          name?: string
+          objective?: string
+          offtaker?: string
+          portfolio_id?: string | null
+          region?: string
+          spent?: number
+          spi?: number
+          stage?: string
+          status?: string
+          technology?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
