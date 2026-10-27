@@ -41,6 +41,8 @@ function FactsPage(){
  const [excerpt,setExcerpt]=useState("");
  const [batch,setBatch]=useState("");
  const [importName,setImportName]=useState("");
+ const [statusFilter,setStatusFilter]=useState("all");
+ const [search,setSearch]=useState("");
  const [reviewId,setReviewId]=useState("");
  const [reviewNotes,setReviewNotes]=useState("");
  const [saving,setSaving]=useState(false);
@@ -50,6 +52,7 @@ function FactsPage(){
  const activeSource=sources.some(s=>s.id===sourceId)?sourceId:(sources[0]?.id??"");
  const org=data?.portfolios.find(p=>p.id===data.projects.find(x=>x.id===selected)?.portfolio_id)?.org_id;
  const roles=data?.memberships.filter(m=>m.organisation_id===org).map(m=>m.role)??[];
+ const visibleFacts=(data?.facts??[]).filter(f=>f.project_id===selected&&(statusFilter==="all"||f.review_status===statusFilter)&&(!search.trim()||[f.fact_key,f.fact_value,f.excerpt,sources.find(x=>x.id===f.source_id)?.title??""].some(v=>v.toLowerCase().includes(search.toLowerCase().trim()))));
  const canWrite=roles.some(r=>["admin","director","manager"].includes(r));
  const canReview=roles.some(r=>["admin","director"].includes(r));
  const refresh=()=>qc.invalidateQueries({queryKey:["knowledge-facts",user.id]});
@@ -123,7 +126,9 @@ function FactsPage(){
      <Button disabled={saving||!activeSource} onClick={submit}>{saving?"Saving…":"Save candidate facts"}</Button>
     </section>}
     <section className="space-y-2"><h2 className="font-semibold">Candidate and reviewed facts</h2>
-     {data.facts.filter(f=>f.project_id===selected).map(f=><article key={f.id} className="space-y-2 rounded border p-3 text-sm">
+     <div className="flex flex-wrap gap-3"><Input className="max-w-sm" aria-label="Search facts" placeholder="Search facts, values or sources" value={search} onChange={e=>setSearch(e.target.value)}/><select aria-label="Filter fact review status" className="rounded border bg-background p-2 text-sm" value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}><option value="all">All statuses</option><option value="pending">Pending review</option><option value="accepted">Accepted</option><option value="rejected">Rejected</option></select></div>
+     <p className="text-xs text-muted-foreground">{visibleFacts.length} matching facts · {(data.facts??[]).filter(f=>f.project_id===selected&&f.review_status==="pending").length} awaiting independent review</p>
+     {visibleFacts.map(f=><article key={f.id} className="space-y-2 rounded border p-3 text-sm">
       <div className="flex justify-between gap-2"><strong>{f.fact_key}: {f.fact_value}</strong><span className="text-xs">{f.review_status}</span></div>
       <p className="text-xs text-muted-foreground">Source: {sources.find(s=>s.id===f.source_id)?.title??f.source_id}</p>
       {f.excerpt&&<p className="text-xs">Excerpt: {f.excerpt}</p>}
@@ -133,6 +138,7 @@ function FactsPage(){
         <div className="flex gap-2"><Button disabled={saving} onClick={()=>review(f.id,"accepted")}>Accept</Button><Button disabled={saving} variant="outline" onClick={()=>review(f.id,"rejected")}>Reject</Button></div></>}
       </div>}
      </article>)}
+     {visibleFacts.length===0&&<p className="text-sm text-muted-foreground">No facts match the current filters.</p>}
     </section>
     <section className="space-y-2"><h2 className="font-semibold">Potential contradictions</h2>
      {data.conflicts.filter(c=>c.project_id===selected).length===0&&<p className="text-sm text-muted-foreground">No conflicting accepted values found.</p>}
