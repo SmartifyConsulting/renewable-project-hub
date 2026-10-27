@@ -11,6 +11,7 @@ const LINKS = [
   { to: "/readiness-live", label: "Readiness" },
   { to: "/knowledge", label: "Knowledge" },
   { to: "/knowledge-facts", label: "Facts" },
+  { to: "/activation", label: "Activation" },
   { to: "/audit", label: "Audit history" },
 ] as const;
 
