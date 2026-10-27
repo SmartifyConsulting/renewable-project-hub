@@ -70,6 +70,13 @@ export type Database = {
             foreignKeyName: "audit_events_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
+            referencedRelation: "rpos_escalation_overview"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "audit_events_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
             referencedRelation: "rpos_executive_project_kpis"
             referencedColumns: ["project_id"]
           },
@@ -142,6 +149,13 @@ export type Database = {
             foreignKeyName: "canonical_objects_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
+            referencedRelation: "rpos_escalation_overview"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "canonical_objects_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
             referencedRelation: "rpos_executive_project_kpis"
             referencedColumns: ["project_id"]
           },
@@ -206,6 +220,13 @@ export type Database = {
             foreignKeyName: "evidence_references_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
+            referencedRelation: "rpos_escalation_overview"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "evidence_references_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
             referencedRelation: "rpos_executive_project_kpis"
             referencedColumns: ["project_id"]
           },
@@ -259,6 +280,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "object_relationships_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "rpos_escalation_overview"
+            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "object_relationships_project_id_fkey"
@@ -414,6 +442,13 @@ export type Database = {
             foreignKeyName: "project_memberships_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
+            referencedRelation: "rpos_escalation_overview"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "project_memberships_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
             referencedRelation: "rpos_executive_project_kpis"
             referencedColumns: ["project_id"]
           },
@@ -537,6 +572,13 @@ export type Database = {
             foreignKeyName: "readiness_domain_assessments_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
+            referencedRelation: "rpos_escalation_overview"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "readiness_domain_assessments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
             referencedRelation: "rpos_executive_project_kpis"
             referencedColumns: ["project_id"]
           },
@@ -585,6 +627,13 @@ export type Database = {
             foreignKeyName: "readiness_gate_decisions_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
+            referencedRelation: "rpos_escalation_overview"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "readiness_gate_decisions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
             referencedRelation: "rpos_executive_project_kpis"
             referencedColumns: ["project_id"]
           },
@@ -626,6 +675,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rpos_activation_acceptances_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "rpos_escalation_overview"
+            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "rpos_activation_acceptances_project_id_fkey"
@@ -696,6 +752,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rpos_activation_items_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "rpos_escalation_overview"
+            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "rpos_activation_items_project_id_fkey"
@@ -839,6 +902,13 @@ export type Database = {
             foreignKeyName: "rpos_ai_recommendations_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
+            referencedRelation: "rpos_escalation_overview"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "rpos_ai_recommendations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
             referencedRelation: "rpos_executive_project_kpis"
             referencedColumns: ["project_id"]
           },
@@ -888,6 +958,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rpos_assurance_inspections_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "rpos_escalation_overview"
+            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "rpos_assurance_inspections_project_id_fkey"
@@ -963,6 +1040,13 @@ export type Database = {
             foreignKeyName: "rpos_assurance_ncrs_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
+            referencedRelation: "rpos_escalation_overview"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "rpos_assurance_ncrs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
             referencedRelation: "rpos_executive_project_kpis"
             referencedColumns: ["project_id"]
           },
@@ -1009,6 +1093,13 @@ export type Database = {
             foreignKeyName: "rpos_assurance_verifications_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
+            referencedRelation: "rpos_escalation_overview"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "rpos_assurance_verifications_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
             referencedRelation: "rpos_executive_project_kpis"
             referencedColumns: ["project_id"]
           },
@@ -1046,6 +1137,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rpos_delivery_approvals_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "rpos_escalation_overview"
+            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "rpos_delivery_approvals_project_id_fkey"
@@ -1127,6 +1225,13 @@ export type Database = {
             foreignKeyName: "rpos_delivery_records_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
+            referencedRelation: "rpos_escalation_overview"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "rpos_delivery_records_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
             referencedRelation: "rpos_executive_project_kpis"
             referencedColumns: ["project_id"]
           },
@@ -1191,10 +1296,41 @@ export type Database = {
             foreignKeyName: "rpos_delivery_schedule_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
+            referencedRelation: "rpos_escalation_overview"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "rpos_delivery_schedule_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
             referencedRelation: "rpos_executive_project_kpis"
             referencedColumns: ["project_id"]
           },
         ]
+      }
+      rpos_escalation_policies: {
+        Row: {
+          critical_days: number
+          organisation_id: string
+          updated_at: string
+          updated_by: string
+          warning_days: number
+        }
+        Insert: {
+          critical_days?: number
+          organisation_id: string
+          updated_at?: string
+          updated_by: string
+          warning_days?: number
+        }
+        Update: {
+          critical_days?: number
+          organisation_id?: string
+          updated_at?: string
+          updated_by?: string
+          warning_days?: number
+        }
+        Relationships: []
       }
       rpos_knowledge_sources: {
         Row: {
@@ -1251,10 +1387,35 @@ export type Database = {
             foreignKeyName: "rpos_knowledge_sources_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
+            referencedRelation: "rpos_escalation_overview"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "rpos_knowledge_sources_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
             referencedRelation: "rpos_executive_project_kpis"
             referencedColumns: ["project_id"]
           },
         ]
+      }
+      rpos_notification_reads: {
+        Row: {
+          notification_key: string
+          read_at: string
+          user_id: string
+        }
+        Insert: {
+          notification_key: string
+          read_at?: string
+          user_id: string
+        }
+        Update: {
+          notification_key?: string
+          read_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       rpos_readiness_source_links: {
         Row: {
@@ -1353,6 +1514,13 @@ export type Database = {
             foreignKeyName: "rpos_source_facts_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
+            referencedRelation: "rpos_escalation_overview"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "rpos_source_facts_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
             referencedRelation: "rpos_executive_project_kpis"
             referencedColumns: ["project_id"]
           },
@@ -1376,6 +1544,25 @@ export type Database = {
           title: string | null
         }
         Relationships: []
+      }
+      rpos_escalation_overview: {
+        Row: {
+          approvals_pending: number | null
+          critical_alerts: number | null
+          delivery_alerts: number | null
+          organisation_id: string | null
+          project_id: string | null
+          schedule_alerts: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portfolios_org_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       rpos_executive_project_kpis: {
         Row: {
@@ -1460,6 +1647,13 @@ export type Database = {
             foreignKeyName: "rpos_source_facts_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
+            referencedRelation: "rpos_escalation_overview"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "rpos_source_facts_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
             referencedRelation: "rpos_executive_project_kpis"
             referencedColumns: ["project_id"]
           },
@@ -1478,6 +1672,19 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      rpos_notifications: {
+        Row: {
+          category: string | null
+          message: string | null
+          notification_key: string | null
+          occurred_at: string | null
+          project_id: string | null
+          recipient_id: string | null
+          severity: string | null
+          title: string | null
+        }
+        Relationships: []
       }
     }
     Functions: {
@@ -1586,6 +1793,19 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      rpos_my_notifications: {
+        Args: never
+        Returns: {
+          category: string
+          is_read: boolean
+          message: string
+          notification_key: string
+          occurred_at: string
+          project_id: string
+          severity: string
+          title: string
+        }[]
       }
       rpos_record_inspection: {
         Args: {
@@ -1884,6 +2104,22 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "readiness_domain_assessments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      rpos_set_escalation_policy: {
+        Args: { p_critical: number; p_org: string; p_warning: number }
+        Returns: {
+          critical_days: number
+          organisation_id: string
+          updated_at: string
+          updated_by: string
+          warning_days: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "rpos_escalation_policies"
           isOneToOne: true
           isSetofReturn: false
         }
