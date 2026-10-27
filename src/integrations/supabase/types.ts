@@ -24,6 +24,7 @@ export type Database = {
           entity_type: string
           id: number
           occurred_at: string
+          organisation_id: string | null
           project_id: string | null
         }
         Insert: {
@@ -35,6 +36,7 @@ export type Database = {
           entity_type: string
           id?: never
           occurred_at?: string
+          organisation_id?: string | null
           project_id?: string | null
         }
         Update: {
@@ -46,9 +48,17 @@ export type Database = {
           entity_type?: string
           id?: never
           occurred_at?: string
+          organisation_id?: string | null
           project_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "audit_events_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "audit_events_project_id_fkey"
             columns: ["project_id"]
@@ -454,6 +464,44 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      rpos_remove_org_membership: {
+        Args: { p_org_id: string; p_user_id: string }
+        Returns: undefined
+      }
+      rpos_remove_project_membership: {
+        Args: { p_project_id: string; p_user_id: string }
+        Returns: undefined
+      }
+      rpos_set_org_membership: {
+        Args: { p_org_id: string; p_role: string; p_user_id: string }
+        Returns: {
+          created_at: string
+          organisation_id: string
+          role: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "organisation_memberships"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      rpos_set_project_membership: {
+        Args: { p_project_id: string; p_role: string; p_user_id: string }
+        Returns: {
+          created_at: string
+          project_id: string
+          role: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "project_memberships"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       rpos_upsert_portfolio: {
         Args: {
           p_description?: string

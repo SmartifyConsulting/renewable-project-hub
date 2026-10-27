@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { LogOut, Pencil, Plus } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { UserIdBadge, WorkspaceHeader } from "@/components/rpos/workspace-header";
 import { canWriteOrg, mapRpcError, membershipState } from "@/lib/rpos/auth-config";
 
 export const Route = createFileRoute("/_authenticated/workspace")({
@@ -74,20 +75,15 @@ function Workspace() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="flex h-14 items-center gap-3 border-b bg-card px-5">
-        <span className="grid size-8 place-items-center rounded-md bg-primary font-display text-sm font-bold text-primary-foreground">R</span>
-        <span className="font-display text-sm font-bold">RPOS Workspace</span>
-        <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-semibold uppercase text-muted-foreground">Live data</span>
-        <span className="ml-auto text-xs text-muted-foreground">{user.email}</span>
-        <Button size="sm" variant="outline" onClick={signOut}><LogOut className="size-4" /> Sign out</Button>
-      </header>
+      <WorkspaceHeader email={user.email} onSignOut={signOut} />
       <main className="mx-auto max-w-6xl space-y-8 px-5 py-6">
         {q.isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
         {q.error && <p role="alert" className="text-sm text-destructive">Could not load your workspace. Please try again.</p>}
         {d && membershipState(d.orgRoles.length, d.projectMemberships) === "no-membership" && (
           <div className="rounded-lg border bg-card p-6">
             <h1 className="font-display text-lg font-semibold">No organisation membership</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Your account is signed in but has not been added to any organisation or project. Ask your organisation administrator to grant access.</p>
+            <p className="mt-1 text-sm text-muted-foreground">Your account is signed in but has not been added to any organisation or project. Send your user ID below to your organisation administrator so they can add you.</p>
+            <UserIdBadge id={user.id} />
             <Link to="/" className="mt-3 inline-block text-xs text-primary hover:underline">Explore the demo meanwhile</Link>
           </div>
         )}

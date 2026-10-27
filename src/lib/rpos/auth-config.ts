@@ -39,3 +39,11 @@ export function mapRpcError(err: unknown): string {
   console.error("[rpc]", err);
   return "Could not save. Please try again.";
 }
+
+export const MEMBER_ROLES = ["admin", "director", "manager", "member", "viewer"] as const;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+/** Accepts only a well-formed account ID (UUID); trims whitespace. Returns null if invalid. */
+export function parseUserId(v: string): string | null {
+  const t = v.trim().toLowerCase();
+  return UUID_RE.test(t) ? t : null;
+}

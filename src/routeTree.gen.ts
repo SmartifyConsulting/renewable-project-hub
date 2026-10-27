@@ -24,6 +24,8 @@ import { Route as ReadinessRouteImport } from './routes/readiness'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RkiRouteImport } from './routes/rki'
+import { Route as AuthenticatedAuditRouteImport } from './routes/_authenticated/audit'
+import { Route as AuthenticatedMembersRouteImport } from './routes/_authenticated/members'
 import { Route as AuthenticatedWorkspaceRouteImport } from './routes/_authenticated/workspace'
 import { Route as PortfoliosIndexRouteImport } from './routes/portfolios.index'
 import { Route as PortfoliosIdRouteImport } from './routes/portfolios.$id'
@@ -105,6 +107,16 @@ const RkiRoute = RkiRouteImport.update({
   path: '/rki',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAuditRoute = AuthenticatedAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMembersRoute = AuthenticatedMembersRouteImport.update({
+  id: '/members',
+  path: '/members',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedWorkspaceRoute = AuthenticatedWorkspaceRouteImport.update({
   id: '/workspace',
   path: '/workspace',
@@ -151,6 +163,8 @@ export interface FileRoutesByFullPath {
   '/reports': typeof ReportsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/rki': typeof RkiRoute
+  '/audit': typeof AuthenticatedAuditRoute
+  '/members': typeof AuthenticatedMembersRoute
   '/workspace': typeof AuthenticatedWorkspaceRoute
   '/portfolios/$id': typeof PortfoliosIdRoute
   '/projects/$id': typeof ProjectsIdRoute
@@ -173,6 +187,8 @@ export interface FileRoutesByTo {
   '/reports': typeof ReportsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/rki': typeof RkiRoute
+  '/audit': typeof AuthenticatedAuditRoute
+  '/members': typeof AuthenticatedMembersRoute
   '/workspace': typeof AuthenticatedWorkspaceRoute
   '/portfolios/$id': typeof PortfoliosIdRoute
   '/projects/$id': typeof ProjectsIdRoute
@@ -197,6 +213,8 @@ export interface FileRoutesById {
   '/reports': typeof ReportsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/rki': typeof RkiRoute
+  '/_authenticated/audit': typeof AuthenticatedAuditRoute
+  '/_authenticated/members': typeof AuthenticatedMembersRoute
   '/_authenticated/workspace': typeof AuthenticatedWorkspaceRoute
   '/portfolios/$id': typeof PortfoliosIdRoute
   '/projects/$id': typeof ProjectsIdRoute
@@ -221,6 +239,8 @@ export interface FileRouteTypes {
     | '/reports'
     | '/reset-password'
     | '/rki'
+    | '/audit'
+    | '/members'
     | '/workspace'
     | '/portfolios/$id'
     | '/projects/$id'
@@ -243,6 +263,8 @@ export interface FileRouteTypes {
     | '/reports'
     | '/reset-password'
     | '/rki'
+    | '/audit'
+    | '/members'
     | '/workspace'
     | '/portfolios/$id'
     | '/projects/$id'
@@ -266,6 +288,8 @@ export interface FileRouteTypes {
     | '/reports'
     | '/reset-password'
     | '/rki'
+    | '/_authenticated/audit'
+    | '/_authenticated/members'
     | '/_authenticated/workspace'
     | '/portfolios/$id'
     | '/projects/$id'
@@ -404,6 +428,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RkiRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/audit': {
+      id: '/_authenticated/audit'
+      path: '/audit'
+      fullPath: '/audit'
+      preLoaderRoute: typeof AuthenticatedAuditRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/members': {
+      id: '/_authenticated/members'
+      path: '/members'
+      fullPath: '/members'
+      preLoaderRoute: typeof AuthenticatedMembersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/workspace': {
       id: '/_authenticated/workspace'
       path: '/workspace'
@@ -450,10 +488,14 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAuditRoute: typeof AuthenticatedAuditRoute
+  AuthenticatedMembersRoute: typeof AuthenticatedMembersRoute
   AuthenticatedWorkspaceRoute: typeof AuthenticatedWorkspaceRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAuditRoute: AuthenticatedAuditRoute,
+  AuthenticatedMembersRoute: AuthenticatedMembersRoute,
   AuthenticatedWorkspaceRoute: AuthenticatedWorkspaceRoute,
 }
 
