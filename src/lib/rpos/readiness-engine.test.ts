@@ -41,6 +41,16 @@ describe("readiness recommendations", () => {
     domains[0].id = "D99";
     expect(evaluateReadiness(domains).result).toBe("INCOMPLETE");
   });
+  it("does not recommend GO with a low-scoring critical domain", () => {
+    const domains = base();
+    domains[0].score = 1;
+    expect(evaluateReadiness(domains).result).toBe("CONDITIONAL GO");
+  });
+  it("does not treat an unscored domain as zero", () => {
+    const domains = base();
+    domains[0].score = null;
+    expect(evaluateReadiness(domains)).toMatchObject({ result: "INCOMPLETE", overall: null });
+  });
   it("does not approve a gate automatically", () => {
     expect(evaluateReadiness(base()).requiresHumanApproval).toBe(true);
   });
