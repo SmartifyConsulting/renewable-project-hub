@@ -14,6 +14,17 @@ export const extractPdfCandidates = createServerFn({ method: "POST" })
    .select("id,source_uri,project_id" as never).eq("id" as never,data.source_id).single();
   if (error || !source) throw new Error("Source unavailable or access denied");
   const record = source as unknown as { source_uri: string; project_id: string };
+  // Only organisation writers may invoke paid extraction; source read access alone is insufficient.
+  const { data: project, error: projectError } = await db.from("projects")
+   .select("portfolio_id").eq("id",record.project_id).single();
+  if (projectError || !project?.portfolio_id) throw new Error("Project unavailable");
+  const { data: portfolio, error: portfolioError } = await db.from("portfolios")
+   .select("org_id").eq("id",project.portfolio_id).single();
+  if (portfolioError || !portfolio?.org_id) throw new Error("Portfolio unavailable");
+  const { data: memberships, error: membershipError } = await db.from("organisation_memberships")
+   .select("role").eq("organisation_id",portfolio.org_id).eq("user_id",context.userId);
+  if (membershipError || !memberships?.some(m=>["admin","director","manager"].includes(m.role)))
+   throw new Error("Only authorised project writers may request AI extraction");
   const prefix = "storage:rpos-knowledge/";
   if (!record.source_uri.startsWith(prefix) || !record.source_uri.toLowerCase().endsWith(".pdf"))
    throw new Error("Select a registered PDF document");
