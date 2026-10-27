@@ -8,7 +8,7 @@ import {Textarea} from "@/components/ui/textarea";
 import {supabase} from "@/integrations/supabase/client";
 import {WorkspaceHeader,useSignOut} from "@/components/rpos/workspace-header";
 import {canWriteOrg,mapRpcError} from "@/lib/rpos/auth-config";
-export const Route=createFileRoute("/_authenticated/delivery")({component:DeliveryPage});
+export const Route=createFileRoute("/_authenticated/delivery-live")({component:DeliveryPage});
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db=supabase as any;
 type RecordItem={id:string;project_id:string;record_type:string;reference:string;title:string;description:string;status:string;priority:string;owner_user_id:string|null;due_date:string|null;impact:string;mitigation:string;created_by:string};

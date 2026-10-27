@@ -8,7 +8,7 @@ import {Textarea} from "@/components/ui/textarea";
 import {supabase} from "@/integrations/supabase/client";
 import {WorkspaceHeader,useSignOut} from "@/components/rpos/workspace-header";
 import {canWriteOrg,mapRpcError} from "@/lib/rpos/auth-config";
-export const Route=createFileRoute("/_authenticated/assurance")({component:AssurancePage});
+export const Route=createFileRoute("/_authenticated/assurance-live")({component:AssurancePage});
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db=supabase as any;
 type Inspection={id:string;project_id:string;reference:string;title:string;inspection_date:string;discipline:string;result:string;findings:string};
