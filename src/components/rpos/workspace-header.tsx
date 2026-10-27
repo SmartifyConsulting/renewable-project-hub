@@ -11,7 +11,7 @@ const LINKS = [
   { to: "/audit", label: "Audit history" },
 ] as const;
 
-export function WorkspaceHeader({ email, onSignOut }: { email?: string; onSignOut: () => void }) {
+export function WorkspaceHeader({ email, onSignOut }: { email?: string | undefined; onSignOut: () => void }) {
   return (
     <header className="flex h-14 items-center gap-3 border-b bg-card px-5">
       <span className="grid size-8 place-items-center rounded-md bg-primary font-display text-sm font-bold text-primary-foreground">R</span>
