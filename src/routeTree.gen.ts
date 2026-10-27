@@ -10,43 +10,43 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as PortfoliosRouteImport } from './routes/portfolios'
+import { Route as PortfoliosIndexRouteImport } from './routes/portfolios.index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PortfoliosRoute = PortfoliosRouteImport.update({
-  id: '/portfolios',
-  path: '/portfolios',
+const PortfoliosIndexRoute = PortfoliosIndexRouteImport.update({
+  id: '/portfolios/',
+  path: '/portfolios/',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/portfolios': typeof PortfoliosRoute
+  '/portfolios/': typeof PortfoliosIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/portfolios': typeof PortfoliosRoute
+  '/portfolios': typeof PortfoliosIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/portfolios': typeof PortfoliosRoute
+  '/portfolios/': typeof PortfoliosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/portfolios'
+  fullPaths: '/' | '/portfolios/'
   fileRoutesByTo: FileRoutesByTo
   to: '/' | '/portfolios'
-  id: '__root__' | '/' | '/portfolios'
+  id: '__root__' | '/' | '/portfolios/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  PortfoliosRoute: typeof PortfoliosRoute
+  PortfoliosIndexRoute: typeof PortfoliosIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -58,11 +58,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/portfolios': {
-      id: '/portfolios'
+    '/portfolios/': {
+      id: '/portfolios/'
       path: '/portfolios'
-      fullPath: '/portfolios'
-      preLoaderRoute: typeof PortfoliosRouteImport
+      fullPath: '/portfolios/'
+      preLoaderRoute: typeof PortfoliosIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -70,7 +70,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  PortfoliosRoute: PortfoliosRoute,
+  PortfoliosIndexRoute: PortfoliosIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
