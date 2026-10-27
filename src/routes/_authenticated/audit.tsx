@@ -40,15 +40,15 @@ async function load(f: Filters, page: number) {
 function csvCell(value: unknown): string {
   const raw = value == null ? "" : typeof value === "string" ? value : JSON.stringify(value);
   // Prevent spreadsheet formula execution when an audit export is opened in Excel.
-  const safe = /^[\\s]*[=+@\\-]/.test(raw) ? "'" + raw : raw;
+  const safe = /^\s*[=+@-]/.test(raw) ? "'" + raw : raw;
   return '"' + safe.replace(/"/g, '""') + '"';
 }
 
 function exportPage(rows: Awaited<ReturnType<typeof load>>["rows"]) {
   const columns = ["Timestamp (UTC)", "Entity type", "Action", "Entity ID", "Actor user ID", "Organisation ID", "Project ID", "Before (JSON)", "After (JSON)"];
   const records = rows.map((e) => [e.occurred_at, e.entity_type, e.action, e.entity_id, e.actor_user_id, e.organisation_id, e.project_id, e.before_state, e.after_state]);
-  const csv = [columns, ...records].map((line) => line.map(csvCell).join(",")).join("\\r\\n");
-  const url = URL.createObjectURL(new Blob(["\\uFEFF", csv], { type: "text/csv;charset=utf-8" }));
+  const csv = [columns, ...records].map((line) => line.map(csvCell).join(",")).join("\r\n");
+  const url = URL.createObjectURL(new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8" }));
   const link = document.createElement("a");
   link.href = url;
   link.download = "rpos-audit-page-" + new Date().toISOString().slice(0, 10) + ".csv";
