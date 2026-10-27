@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { WorkspaceHeader, useSignOut } from "@/components/rpos/workspace-header";
 import { mapRpcError } from "@/lib/rpos/auth-config";
+import { parseCandidateFacts } from "@/lib/rpos/knowledge-extraction";
 
 export const Route = createFileRoute("/_authenticated/knowledge-facts")({component: FactsPage});
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -65,8 +66,9 @@ function FactsPage(){
   if(!/\.(txt|csv)$/i.test(file.name)||file.size>2097152){toast.error("Choose a TXT or CSV file under 2 MiB.");return;}
   try{
    const content=await file.text();
-   const rows=content.split("\n").map(line=>line.trim()).filter(line=>line.includes(":"));
-   setBatch(rows.slice(0,50).join("\n"));setImportName(file.name);
+   const rows=parseCandidateFacts(content);
+   if(!rows.length){toast.error("No valid Key: Value candidates found.");return;}
+   setBatch(rows.map(row=>row.excerpt).join("\n"));setImportName(file.name);
    toast.info("Review the extracted text before submitting candidates.");
   }catch{toast.error("File could not be read.");}
  }
@@ -75,12 +77,9 @@ function FactsPage(){
   setSaving(true);
   try{
    if(batch.trim()){
-    const candidates=batch.split(/\r?\n/).map(line=>{
-     const separator=line.indexOf(":");
-     return separator<0?null:{factKey:line.slice(0,separator).trim(),factValue:line.slice(separator+1).trim(),line};
-    }).filter((x):x is {factKey:string;factValue:string;line:string}=>!!x&&x.factKey.length>=2&&x.factValue.length>0);
+    const candidates=parseCandidateFacts(batch,51);
     if(candidates.length===0||candidates.length>50) throw new Error("Provide 1–50 lines in Key: Value format.");
-    for(const c of candidates) await saveFact(c.factKey,c.factValue,"text_pattern",c.line.slice(0,4000));
+    for(const c of candidates) await saveFact(c.key,c.value,"text_pattern",c.excerpt);
     setBatch("");
     toast.success(`${candidates.length} candidate facts saved for independent review`);
    }else{
