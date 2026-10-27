@@ -14,6 +14,7 @@ const LINKS = [
   { to: "/activation", label: "Activation" },
   { to: "/delivery", label: "Delivery" },
   { to: "/schedule", label: "Schedule" },
+  { to: "/assurance", label: "Assurance" },
   { to: "/audit", label: "Audit history" },
 ] as const;
 
