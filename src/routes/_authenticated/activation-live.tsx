@@ -8,7 +8,7 @@ import {Textarea} from "@/components/ui/textarea";
 import {supabase} from "@/integrations/supabase/client";
 import {WorkspaceHeader,useSignOut} from "@/components/rpos/workspace-header";
 import {canWriteOrg,mapRpcError} from "@/lib/rpos/auth-config";
-export const Route=createFileRoute("/_authenticated/activation")({component:ActivationPage});
+export const Route=createFileRoute("/_authenticated/activation-live")({component:ActivationPage});
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db=supabase as any;
 type Acceptance={item_id:string;project_id:string;accepted_by:string;accepted_at:string;rationale:string};
