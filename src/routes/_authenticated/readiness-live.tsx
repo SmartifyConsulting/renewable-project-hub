@@ -14,7 +14,7 @@ import { WorkspaceHeader, useSignOut } from "@/components/rpos/workspace-header"
 
 export const Route = createFileRoute("/_authenticated/readiness-live")({ component: LiveReadiness });
 
-type Assessment = {
+type GateDecision = { id: number; project_id: string; decision: string; rationale: string; decided_at: string; snapshot_updated_at: string };\ntype Assessment = {
   project_id: string; domain_id: string; score: number | null;
   evidence_verified: boolean; hard_stop: boolean; evidence_notes: string;
 };
@@ -27,20 +27,20 @@ type Portfolio = { id: string; org_id: string };
 const readinessDb = supabase as any;
 
 async function load(userId: string) {
-  const [projects, portfolios, memberships, assessments] = await Promise.all([
+  const [projects, portfolios, memberships, assessments, gates] = await Promise.all([
     supabase.from("projects").select("id,name,stage,portfolio_id").order("name"),
     supabase.from("portfolios").select("id,org_id"),
     supabase.from("organisation_memberships").select("organisation_id,role").eq("user_id", userId),
     readinessDb.from("readiness_domain_assessments")
-      .select("project_id,domain_id,score,evidence_verified,hard_stop,evidence_notes"),
+      .select("project_id,domain_id,score,evidence_verified,hard_stop,evidence_notes"),\n    readinessDb.from("readiness_gate_decisions").select("id,project_id,decision,rationale,decided_at,snapshot_updated_at").order("decided_at", { ascending: false }),
   ]);
-  const error = projects.error ?? portfolios.error ?? memberships.error ?? assessments.error;
+  const error = projects.error ?? portfolios.error ?? memberships.error ?? assessments.error ?? gates.error;
   if (error) throw error;
   return {
     projects: (projects.data ?? []) as Project[],
     portfolios: (portfolios.data ?? []) as Portfolio[],
     memberships: (memberships.data ?? []) as Membership[],
-    assessments: (assessments.data ?? []) as Assessment[],
+    assessments: (assessments.data ?? []) as Assessment[],\n    gates: (gates.data ?? []) as GateDecision[],
   };
 }
 
@@ -104,6 +104,50 @@ function DomainEditor({ projectId, domain, record, canEdit, onSaved }: {
   );
 }
 
+function GatePanel({ projectId, canDecide, decisions, onSaved }: {
+  projectId: string; canDecide: boolean; decisions: GateDecision[]; onSaved: () => Promise<unknown>;
+}) {
+  const [decision, setDecision] = useState("rejected");
+  const [rationale, setRationale] = useState("");
+  const [saving, setSaving] = useState(false);
+  const latest = decisions[0];
+  async function submit() {
+    if (rationale.trim().length < 10) { toast.error("Provide at least ten characters of rationale."); return; }
+    setSaving(true);
+    try {
+      const { error } = await readinessDb.rpc("rpos_decide_readiness_gate", {
+        p_project_id: projectId, p_decision: decision, p_rationale: rationale.trim(),
+      });
+      if (error) throw error;
+      setRationale("");
+      await onSaved();
+      toast.success("Human gate decision recorded");
+    } catch (error) { toast.error(mapRpcError(error)); }
+    finally { setSaving(false); }
+  }
+  return <div className="mt-5 space-y-3 rounded-lg border p-4">
+    <h3 className="font-semibold">Human stage-gate decisions</h3>
+    {latest ? <div className="text-sm">
+      <p><strong>Latest decision:</strong> {latest.decision.replaceAll("_", " ")}</p>
+      <p className="text-xs text-muted-foreground">Recorded {new Date(latest.decided_at).toLocaleString()}</p>
+      <p className="mt-1 whitespace-pre-wrap">{latest.rationale}</p>
+      <p className="mt-1 text-xs text-muted-foreground">Historical snapshot — reassess after any domain changes.</p>
+    </div> : <p className="text-sm text-muted-foreground">No authorised decision recorded.</p>}
+    {canDecide && <div className="space-y-2 border-t pt-3">
+      <p className="text-xs text-muted-foreground">Only an organisation admin or director can record a decision. The server enforces evidence and scoring rules.</p>
+      <select aria-label="Gate decision" className="rounded-md border bg-background px-3 py-2 text-sm"
+        value={decision} onChange={(e) => setDecision(e.target.value)}>
+        <option value="rejected">Reject</option>
+        <option value="conditionally_approved">Conditionally approve</option>
+        <option value="approved">Approve</option>
+      </select>
+      <Textarea aria-label="Decision rationale" value={rationale} maxLength={4000}
+        placeholder="Record the decision rationale and conditions" onChange={(e) => setRationale(e.target.value)} />
+      <Button disabled={saving} onClick={submit}>{saving ? "Recording…" : "Record human decision"}</Button>
+    </div>}
+  </div>;
+}
+
 function LiveReadiness() {
   const { user } = Route.useRouteContext();
   const signOut = useSignOut();
@@ -137,7 +181,7 @@ function LiveReadiness() {
         )}
         {visibleProjects.map((project) => {
           const orgId = data.portfolios.find((p) => p.id === project.portfolio_id)?.org_id;
-          const canEdit = data.memberships.some((m) => m.organisation_id === orgId && canWriteOrg(m.role));
+          const canEdit = data.memberships.some((m) => m.organisation_id === orgId && canWriteOrg(m.role));\n          const canDecide = data.memberships.some((m) => m.organisation_id === orgId && ["admin", "director"].includes(m.role));
           const records = data.assessments.filter((a) => a.project_id === project.id);
           const completedCount = DOMAINS.filter((domain) => records.some((a) => a.domain_id === domain.id && a.score !== null)).length;
           const verifiedCount = DOMAINS.filter((domain) => records.some((a) => a.domain_id === domain.id && a.evidence_verified)).length;
