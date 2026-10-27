@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
@@ -66,8 +66,8 @@ function Audit() {
               <tbody className="divide-y">
                 {q.data.length === 0 && <tr><td colSpan={6} className="px-3 py-6 text-center text-muted-foreground">No audit entries match these filters.</td></tr>}
                 {q.data.map((e) => (
-                  <>
-                    <tr key={e.id}>
+                  <Fragment key={e.id}>
+                    <tr>
                       <td className="whitespace-nowrap px-3 py-2">{new Date(e.occurred_at).toLocaleString()}</td>
                       <td className="px-3 py-2">{ENTITY.find(([v]) => v === e.entity_type)?.[1] ?? e.entity_type}</td>
                       <td className="px-3 py-2">{ACTION.find(([v]) => v === e.action)?.[1] ?? e.action}</td>
@@ -83,7 +83,7 @@ function Audit() {
                         </div>
                       </td></tr>
                     )}
-                  </>
+                  </Fragment>
                 ))}
               </tbody>
             </table>
