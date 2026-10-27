@@ -12,3 +12,5 @@
 ## RPOS database
 - Keep `public.projects` private with RLS and service-role-only grants until real workspace access policies are implemented; the prototype role selector is not authentication.
 - Store project fields in snake_case matching the RPOS Project model; defer the portfolio foreign key until its table exists so this table can be created independently.
+- Real customer data lives only under `/workspace` (Supabase email auth, `_authenticated` gate, read-only via RLS SELECT grants); the root `AppShell` demo with mock data and role selector must never read real records nor be presented as authentication.
+- Memberships are admin-provisioned; never auto-create memberships or grant client writes.
