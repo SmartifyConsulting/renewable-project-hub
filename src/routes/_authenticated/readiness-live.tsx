@@ -14,6 +14,8 @@ import { WorkspaceHeader, useSignOut } from "@/components/rpos/workspace-header"
 
 export const Route = createFileRoute("/_authenticated/readiness-live")({ component: LiveReadiness });
 
+type EvidenceSource = { id: string; project_id: string; title: string; status: string };
+type EvidenceLink = { project_id: string; domain_id: string; source_id: string };
 type GateDecision = { id: number; project_id: string; decision: string; rationale: string; decided_at: string; snapshot_updated_at: string };
 type Assessment = {
   project_id: string; domain_id: string; score: number | null;
@@ -28,15 +30,17 @@ type Portfolio = { id: string; org_id: string };
 const readinessDb = supabase as any;
 
 async function load(userId: string) {
-  const [projects, portfolios, memberships, assessments, gates] = await Promise.all([
+  const [projects, portfolios, memberships, assessments, gates, sources, links] = await Promise.all([
     supabase.from("projects").select("id,name,stage,portfolio_id").order("name"),
     supabase.from("portfolios").select("id,org_id"),
     supabase.from("organisation_memberships").select("organisation_id,role").eq("user_id", userId),
     readinessDb.from("readiness_domain_assessments")
       .select("project_id,domain_id,score,evidence_verified,hard_stop,evidence_notes"),
     readinessDb.from("readiness_gate_decisions").select("id,project_id,decision,rationale,decided_at,snapshot_updated_at").order("decided_at", { ascending: false }),
+    readinessDb.from("rpos_knowledge_sources").select("id,project_id,title,status"),
+    readinessDb.from("rpos_readiness_source_links").select("project_id,domain_id,source_id"),
   ]);
-  const error = projects.error ?? portfolios.error ?? memberships.error ?? assessments.error ?? gates.error;
+  const error = projects.error ?? portfolios.error ?? memberships.error ?? assessments.error ?? gates.error ?? sources.error ?? links.error;
   if (error) throw error;
   return {
     projects: (projects.data ?? []) as Project[],
@@ -44,10 +48,13 @@ async function load(userId: string) {
     memberships: (memberships.data ?? []) as Membership[],
     assessments: (assessments.data ?? []) as Assessment[],
     gates: (gates.data ?? []) as GateDecision[],
+    sources: (sources.data ?? []) as EvidenceSource[],
+    links: (links.data ?? []) as EvidenceLink[],
   };
 }
 
-function DomainEditor({ projectId, domain, record, canEdit, onSaved }: {
+function DomainEditor({ projectId, domain, record, canEdit, sources, links, onSaved }: {
+  sources: EvidenceSource[]; links: EvidenceLink[];
   projectId: string; domain: (typeof DOMAINS)[number]; record?: Assessment;
   canEdit: boolean; onSaved: () => Promise<unknown>;
 }) {
@@ -56,6 +63,17 @@ function DomainEditor({ projectId, domain, record, canEdit, onSaved }: {
   const [hardStop, setHardStop] = useState(record?.hard_stop ?? false);
   const [notes, setNotes] = useState(record?.evidence_notes ?? "");
   const [saving, setSaving] = useState(false);
+  const [sourceId, setSourceId] = useState("");
+  async function linkSource() {
+    if (!sourceId) return;
+    setSaving(true);
+    try {
+      const { error } = await readinessDb.rpc("rpos_link_readiness_source", {p_project_id: projectId, p_domain_id: domain.id, p_source_id: sourceId});
+      if (error) throw error;
+      setSourceId(""); await onSaved(); toast.success("Verified evidence linked");
+    } catch (error) { toast.error(mapRpcError(error)); }
+    finally { setSaving(false); }
+  }
   async function save() {
     const parsed = score === "" ? null : Number(score);
     if (parsed !== null && (!Number.isFinite(parsed) || parsed < 0 || parsed > 5 || parsed * 2 % 1 !== 0)) {
@@ -101,6 +119,14 @@ function DomainEditor({ projectId, domain, record, canEdit, onSaved }: {
         <Textarea aria-label={`Evidence notes for ${domain.name}`} placeholder="Evidence references, reviewer and rationale"
           rows={2} maxLength={4000} value={notes} disabled={!canEdit || saving}
           onChange={(e) => setNotes(e.target.value)} />
+      </div>
+      <div className="space-y-2 text-xs">
+        <p className="font-medium">Verified source links ({links.length})</p>
+        {links.map(link => <p key={link.source_id} className="text-muted-foreground">{sources.find(s => s.id === link.source_id)?.title ?? link.source_id}</p>)}
+        {canEdit && <><select aria-label={`Link verified source to ${domain.id}`} className="w-full rounded-md border bg-background p-2" value={sourceId} onChange={e => setSourceId(e.target.value)}>
+          <option value="">Choose verified source</option>
+          {sources.filter(s => s.status === "verified" && !links.some(l => l.source_id === s.id)).map(s => <option key={s.id} value={s.id}>{s.title}</option>)}
+        </select><Button size="sm" variant="outline" disabled={!sourceId || saving || !record} onClick={linkSource}>Link evidence</Button></>}
       </div>
       {canEdit && <Button size="sm" disabled={saving} onClick={save}>{saving ? "Saving…" : "Save"}</Button>}
     </div>
@@ -215,6 +241,8 @@ function LiveReadiness() {
                   <DomainEditor key={`${project.id}:${domain.id}:${JSON.stringify(records.find((a) => a.domain_id === domain.id) ?? null)}`}
                     projectId={project.id} domain={domain}
                     record={records.find((a) => a.domain_id === domain.id)}
+                    sources={data.sources.filter(s => s.project_id === project.id)}
+                    links={data.links.filter(l => l.project_id === project.id && l.domain_id === domain.id)}
                     canEdit={canEdit}
                     onSaved={() => qc.invalidateQueries({ queryKey: ["readiness-live", user.id] })} />
                 ))}
