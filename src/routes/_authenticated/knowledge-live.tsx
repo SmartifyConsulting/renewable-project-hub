@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { mapRpcError } from "@/lib/rpos/auth-config";
 import { WorkspaceHeader, useSignOut } from "@/components/rpos/workspace-header";
 
-export const Route = createFileRoute("/_authenticated/knowledge")({ component: KnowledgePage });
+export const Route = createFileRoute("/_authenticated/knowledge-live")({ component: KnowledgePage });
 // Database types must be regenerated after migration 0008.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any;
