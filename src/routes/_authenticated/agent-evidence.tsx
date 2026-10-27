@@ -1,3 +1,4 @@
+import {analyzeWithOpenAI} from "@/lib/rpos/agent-analyze.functions";
 import {useState} from "react";
 import {createFileRoute} from "@tanstack/react-router";
 import {useQuery} from "@tanstack/react-query";
@@ -17,7 +18,7 @@ function AgentEvidencePage(){
  const projectId=project||projects.data?.[0]?.id||"";const agentKey=agent||agents.data?.[0]?.agent_key||"";
  const evidence=useQuery({queryKey:["agent-evidence",projectId,agentKey],enabled:!!projectId&&!!agentKey,queryFn:async()=>{const r=await db.rpc("rpos_agent_evidence_brief",{p_project_id:projectId,p_agent_key:agentKey});if(r.error)throw r.error;return r.data as Fact[];}});
  const facts=evidence.data??[];const contradictions=facts.filter(f=>Number(f.conflict_count)>0);
- async function analyze(){setRunning(true);try{const {data,error}=await supabase.functions.invoke("rpos-agent-analyze",{body:{project_id:projectId,agent_key:agentKey}});if(error)throw error;if(data?.error)throw new Error(data.error);toast.success("AI recommendation submitted for independent review");}catch(e){toast.error(e instanceof Error?e.message:"AI analysis failed");}finally{setRunning(false);}}
+ async function analyze(){setRunning(true);try{await analyzeWithOpenAI({data:{project_id:projectId,agent_key:agentKey}});toast.success("AI recommendation submitted for independent review");}catch(e){toast.error(e instanceof Error?e.message:"AI analysis failed");}finally{setRunning(false);}}
  const copy=()=>{const content=["Evidence brief (human-reviewed facts only)",`Project: ${projectId}`,`Agent: ${agentKey}`,"",...facts.map(f=>`[${f.fact_id}] Source ${f.source_id}\n${f.fact_key}: ${f.fact_value}\nExcerpt: ${f.excerpt||"Not supplied"}\nPotential conflicts: ${f.conflict_count}`),"","Do not infer unsupported facts. Independently verify any conclusions."];navigator.clipboard.writeText(content.join("\n\n"));};
  return <div className="min-h-screen bg-background"><WorkspaceHeader email={user.email} onSignOut={signOut}/>
  <main className="mx-auto max-w-5xl space-y-5 px-5 py-6">

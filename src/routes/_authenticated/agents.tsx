@@ -45,7 +45,7 @@ function AgentsPage(){
  return <div className="min-h-screen bg-background"><WorkspaceHeader email={user.email} onSignOut={signOut}/>
  <main className="mx-auto max-w-5xl space-y-5 px-5 py-6">
   <h1 className="text-2xl font-semibold">AI Agent Centre</h1>
-  <p className="text-sm text-muted-foreground">Governed specialist agent catalogue and traceable, human-reviewed recommendations. AI-generated and manually authored recommendations require independent human review. Model execution requires a deployed Supabase Edge Function and server-side API key.</p>
+  <p className="text-sm text-muted-foreground">Governed specialist agent catalogue and traceable, human-reviewed recommendations. AI-generated and manually authored recommendations require independent human review. AI generation runs server-side with your OpenAI API key.</p>
   {query.isLoading&&<p>Loading agents…</p>}
   {query.error&&<p role="alert" className="text-destructive">Agent data unavailable. Apply migrations 0022–0023.</p>}
   {data&&<>
