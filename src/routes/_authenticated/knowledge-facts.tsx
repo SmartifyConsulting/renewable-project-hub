@@ -40,6 +40,7 @@ function FactsPage(){
  const [value,setValue]=useState("");
  const [excerpt,setExcerpt]=useState("");
  const [batch,setBatch]=useState("");
+ const [importName,setImportName]=useState("");
  const [reviewId,setReviewId]=useState("");
  const [reviewNotes,setReviewNotes]=useState("");
  const [saving,setSaving]=useState(false);
@@ -55,6 +56,16 @@ function FactsPage(){
  async function saveFact(factKey:string,factValue:string,method:"manual"|"text_pattern",sourceExcerpt:string){
   const {error}=await db.rpc("rpos_record_source_fact",{p_source_id:activeSource,p_fact_key:factKey,p_fact_value:factValue,p_excerpt:sourceExcerpt,p_method:method});
   if(error) throw error;
+ }
+ async function readTextFile(file:File|null){
+  if(!file)return;
+  if(!/\.(txt|csv)$/i.test(file.name)||file.size>2097152){toast.error("Choose a TXT or CSV file under 2 MiB.");return;}
+  try{
+   const content=await file.text();
+   const rows=content.split("\n").map(line=>line.trim()).filter(line=>line.includes(":"));
+   setBatch(rows.slice(0,50).join("\n"));setImportName(file.name);
+   toast.info("Review the extracted text before submitting candidates.");
+  }catch{toast.error("File could not be read.");}
  }
  async function submit(){
   if(!activeSource){toast.error("Select a source first.");return;}
@@ -106,6 +117,8 @@ function FactsPage(){
      <Input aria-label="Fact value" placeholder="Fact value" value={value} onChange={e=>setValue(e.target.value)}/>
      <Textarea aria-label="Supporting excerpt" placeholder="Verbatim source excerpt and page reference" value={excerpt} maxLength={4000} onChange={e=>setExcerpt(e.target.value)}/>
      <p className="text-xs text-muted-foreground">Alternatively paste up to 50 lines of Key: Value text below. Only lines with a colon are staged. PDF and Word parsing are not yet supported.</p>
+     <label className="block text-sm">Import text candidates (TXT/CSV, up to 2 MiB)<Input type="file" accept=".txt,.csv" onChange={e=>readTextFile(e.target.files?.[0]??null)}/></label>
+     {importName&&<p className="text-xs text-muted-foreground">Draft extracted from {importName}. Verify against the registered source before saving.</p>}
      <Textarea aria-label="Bulk key value lines" placeholder={"Capacity: 150 MW\nConnection voltage: 132 kV"} value={batch} onChange={e=>setBatch(e.target.value)}/>
      <Button disabled={saving||!activeSource} onClick={submit}>{saving?"Saving…":"Save candidate facts"}</Button>
     </section>}
