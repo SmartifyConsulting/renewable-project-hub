@@ -94,7 +94,8 @@ function SideNav({ onClose }: { onClose: () => void }) {
       </nav>
       <div className="border-t border-sidebar-border p-3 text-[11px] text-sidebar-foreground/60">
         Viewing as <b className="text-sidebar-foreground">{user.name}</b>
-        <br />UI prototype · mock data
+        <br /><b className="text-sidebar-primary">DEMO MODE</b> · fictional data · role selector is not sign-in
+        <Link to="/workspace" className="mt-2 block font-semibold text-sidebar-foreground underline">Sign in to real workspace →</Link>
       </div>
     </div>
   );
@@ -120,6 +121,7 @@ function TopBar({ onMenu }: { onMenu: () => void }) {
 
   return (
     <header className="sticky top-0 z-20 flex h-14 items-center gap-2 border-b bg-card/95 px-3 backdrop-blur md:px-5">
+      <span className="rounded bg-warning/20 px-1.5 py-0.5 text-[10px] font-bold uppercase text-foreground">Demo</span>
       <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Open navigation" onClick={onMenu}><Menu className="size-4" /></Button>
       <div className="hidden items-center gap-1.5 md:flex">
         <Ctx label="Organisation" value={s.orgId} onChange={(v) => actions.setContext({ orgId: v, portfolioId: "all", projectId: "all" })} options={[["all", "All organisations"], ...s.organisations.map((o) => [o.id, o.name])]} />
@@ -173,7 +175,7 @@ function TopBar({ onMenu }: { onMenu: () => void }) {
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-64">
-          <DropdownMenuLabel>Switch demo role</DropdownMenuLabel>
+          <DropdownMenuLabel>Switch demo role (not authentication)</DropdownMenuLabel>
           <DropdownMenuRadioGroup value={s.roleId} onValueChange={(v) => actions.setContext({ roleId: v as RoleId })}>
             {ROLES.map((r) => (
               <DropdownMenuRadioItem key={r.id} value={r.id} className="text-xs">

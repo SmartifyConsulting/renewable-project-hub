@@ -1,0 +1,1 @@
+GRANT SELECT ON public.organisations, public.portfolios, public.projects, public.organisation_memberships, public.project_memberships TO authenticated;

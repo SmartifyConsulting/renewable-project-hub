@@ -10,16 +10,21 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as ActivationRouteImport } from './routes/activation'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as AssuranceRouteImport } from './routes/assurance'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DeliveryRouteImport } from './routes/delivery'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as IntelligenceRouteImport } from './routes/intelligence'
 import { Route as KnowledgeRouteImport } from './routes/knowledge'
 import { Route as ReadinessRouteImport } from './routes/readiness'
 import { Route as ReportsRouteImport } from './routes/reports'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RkiRouteImport } from './routes/rki'
+import { Route as AuthenticatedWorkspaceRouteImport } from './routes/_authenticated/workspace'
 import { Route as PortfoliosIndexRouteImport } from './routes/portfolios.index'
 import { Route as PortfoliosIdRouteImport } from './routes/portfolios.$id'
 import { Route as ProjectsIndexRouteImport } from './routes/projects.index'
@@ -29,6 +34,10 @@ import { Route as RecordsIdRouteImport } from './routes/records.$id'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ActivationRoute = ActivationRouteImport.update({
@@ -51,9 +60,19 @@ const AssuranceRoute = AssuranceRouteImport.update({
   path: '/assurance',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DeliveryRoute = DeliveryRouteImport.update({
   id: '/delivery',
   path: '/delivery',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IntelligenceRoute = IntelligenceRouteImport.update({
@@ -76,10 +95,20 @@ const ReportsRoute = ReportsRouteImport.update({
   path: '/reports',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RkiRoute = RkiRouteImport.update({
   id: '/rki',
   path: '/rki',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedWorkspaceRoute = AuthenticatedWorkspaceRouteImport.update({
+  id: '/workspace',
+  path: '/workspace',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const PortfoliosIndexRoute = PortfoliosIndexRouteImport.update({
   id: '/portfolios/',
@@ -113,12 +142,16 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/agents': typeof AgentsRoute
   '/assurance': typeof AssuranceRoute
+  '/auth': typeof AuthRoute
   '/delivery': typeof DeliveryRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/intelligence': typeof IntelligenceRoute
   '/knowledge': typeof KnowledgeRoute
   '/readiness': typeof ReadinessRoute
   '/reports': typeof ReportsRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/rki': typeof RkiRoute
+  '/workspace': typeof AuthenticatedWorkspaceRoute
   '/portfolios/$id': typeof PortfoliosIdRoute
   '/projects/$id': typeof ProjectsIdRoute
   '/records/$id': typeof RecordsIdRoute
@@ -131,12 +164,16 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/agents': typeof AgentsRoute
   '/assurance': typeof AssuranceRoute
+  '/auth': typeof AuthRoute
   '/delivery': typeof DeliveryRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/intelligence': typeof IntelligenceRoute
   '/knowledge': typeof KnowledgeRoute
   '/readiness': typeof ReadinessRoute
   '/reports': typeof ReportsRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/rki': typeof RkiRoute
+  '/workspace': typeof AuthenticatedWorkspaceRoute
   '/portfolios/$id': typeof PortfoliosIdRoute
   '/projects/$id': typeof ProjectsIdRoute
   '/records/$id': typeof RecordsIdRoute
@@ -146,16 +183,21 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/activation': typeof ActivationRoute
   '/admin': typeof AdminRoute
   '/agents': typeof AgentsRoute
   '/assurance': typeof AssuranceRoute
+  '/auth': typeof AuthRoute
   '/delivery': typeof DeliveryRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/intelligence': typeof IntelligenceRoute
   '/knowledge': typeof KnowledgeRoute
   '/readiness': typeof ReadinessRoute
   '/reports': typeof ReportsRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/rki': typeof RkiRoute
+  '/_authenticated/workspace': typeof AuthenticatedWorkspaceRoute
   '/portfolios/$id': typeof PortfoliosIdRoute
   '/projects/$id': typeof ProjectsIdRoute
   '/records/$id': typeof RecordsIdRoute
@@ -170,12 +212,16 @@ export interface FileRouteTypes {
     | '/admin'
     | '/agents'
     | '/assurance'
+    | '/auth'
     | '/delivery'
+    | '/forgot-password'
     | '/intelligence'
     | '/knowledge'
     | '/readiness'
     | '/reports'
+    | '/reset-password'
     | '/rki'
+    | '/workspace'
     | '/portfolios/$id'
     | '/projects/$id'
     | '/records/$id'
@@ -188,12 +234,16 @@ export interface FileRouteTypes {
     | '/admin'
     | '/agents'
     | '/assurance'
+    | '/auth'
     | '/delivery'
+    | '/forgot-password'
     | '/intelligence'
     | '/knowledge'
     | '/readiness'
     | '/reports'
+    | '/reset-password'
     | '/rki'
+    | '/workspace'
     | '/portfolios/$id'
     | '/projects/$id'
     | '/records/$id'
@@ -202,16 +252,21 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/_authenticated'
     | '/activation'
     | '/admin'
     | '/agents'
     | '/assurance'
+    | '/auth'
     | '/delivery'
+    | '/forgot-password'
     | '/intelligence'
     | '/knowledge'
     | '/readiness'
     | '/reports'
+    | '/reset-password'
     | '/rki'
+    | '/_authenticated/workspace'
     | '/portfolios/$id'
     | '/projects/$id'
     | '/records/$id'
@@ -221,15 +276,19 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   ActivationRoute: typeof ActivationRoute
   AdminRoute: typeof AdminRoute
   AgentsRoute: typeof AgentsRoute
   AssuranceRoute: typeof AssuranceRoute
+  AuthRoute: typeof AuthRoute
   DeliveryRoute: typeof DeliveryRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   IntelligenceRoute: typeof IntelligenceRoute
   KnowledgeRoute: typeof KnowledgeRoute
   ReadinessRoute: typeof ReadinessRoute
   ReportsRoute: typeof ReportsRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   RkiRoute: typeof RkiRoute
   PortfoliosIdRoute: typeof PortfoliosIdRoute
   ProjectsIdRoute: typeof ProjectsIdRoute
@@ -245,6 +304,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/activation': {
@@ -275,11 +341,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AssuranceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/delivery': {
       id: '/delivery'
       path: '/delivery'
       fullPath: '/delivery'
       preLoaderRoute: typeof DeliveryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/intelligence': {
@@ -310,12 +390,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReportsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/rki': {
       id: '/rki'
       path: '/rki'
       fullPath: '/rki'
       preLoaderRoute: typeof RkiRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/workspace': {
+      id: '/_authenticated/workspace'
+      path: '/workspace'
+      fullPath: '/workspace'
+      preLoaderRoute: typeof AuthenticatedWorkspaceRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/portfolios/': {
       id: '/portfolios/'
@@ -355,17 +449,32 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedWorkspaceRoute: typeof AuthenticatedWorkspaceRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedWorkspaceRoute: AuthenticatedWorkspaceRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   ActivationRoute: ActivationRoute,
   AdminRoute: AdminRoute,
   AgentsRoute: AgentsRoute,
   AssuranceRoute: AssuranceRoute,
+  AuthRoute: AuthRoute,
   DeliveryRoute: DeliveryRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   IntelligenceRoute: IntelligenceRoute,
   KnowledgeRoute: KnowledgeRoute,
   ReadinessRoute: ReadinessRoute,
   ReportsRoute: ReportsRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   RkiRoute: RkiRoute,
   PortfoliosIdRoute: PortfoliosIdRoute,
   ProjectsIdRoute: ProjectsIdRoute,

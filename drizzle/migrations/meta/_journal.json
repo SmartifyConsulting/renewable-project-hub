@@ -15,6 +15,13 @@
       "when": 1793133173348,
       "tag": "0001_restrict_project_access",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793135075946,
+      "tag": "0002_grant_authenticated_select_rpos",
+      "breakpoints": true
     }
   ]
 }
