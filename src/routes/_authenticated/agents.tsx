@@ -12,14 +12,14 @@ export const Route=createFileRoute("/_authenticated/agents")({component:AgentsPa
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db=supabase as any;
 type Agent={agent_key:string;name:string;domain:string;purpose:string;enabled:boolean};
-type Recommendation={id:string;project_id:string;agent_key:string;title:string;recommendation:string;source_references:string;status:string;created_by:string;review_rationale:string|null};
+type Recommendation={id:string;project_id:string;agent_key:string;title:string;recommendation:string;source_references:string;status:string;created_by:string;review_rationale:string|null;generation_method?:string;model_name?:string|null;generated_at?:string|null};
 async function load(userId:string){
  const [projects,portfolios,memberships,agents,recommendations,settings]=await Promise.all([
  supabase.from("projects").select("id,name,portfolio_id").order("name"),
  supabase.from("portfolios").select("id,org_id"),
  supabase.from("organisation_memberships").select("organisation_id,role").eq("user_id",userId),
  db.from("rpos_ai_agents").select("agent_key,name,domain,purpose,enabled").order("name"),
- db.from("rpos_ai_recommendations").select("id,project_id,agent_key,title,recommendation,source_references,status,created_by,review_rationale").order("created_at",{ascending:false}),
+ db.from("rpos_ai_recommendations").select("id,project_id,agent_key,title,recommendation,source_references,status,created_by,review_rationale,generation_method,model_name,generated_at").order("created_at",{ascending:false}),
  db.from("rpos_ai_agent_settings").select("organisation_id,agent_key,enabled")
  ]);
  const error=projects.error??portfolios.error??memberships.error??agents.error??recommendations.error??settings.error;
@@ -45,7 +45,7 @@ function AgentsPage(){
  return <div className="min-h-screen bg-background"><WorkspaceHeader email={user.email} onSignOut={signOut}/>
  <main className="mx-auto max-w-5xl space-y-5 px-5 py-6">
   <h1 className="text-2xl font-semibold">AI Agent Centre</h1>
-  <p className="text-sm text-muted-foreground">Governed specialist agent catalogue and traceable, human-reviewed recommendations. AI execution is not connected yet; submissions are manually authored and must cite sources.</p>
+  <p className="text-sm text-muted-foreground">Governed specialist agent catalogue and traceable, human-reviewed recommendations. AI-generated and manually authored recommendations require independent human review. Model execution requires a deployed Supabase Edge Function and server-side API key.</p>
   {query.isLoading&&<p>Loading agents…</p>}
   {query.error&&<p role="alert" className="text-destructive">Agent data unavailable. Apply migrations 0022–0023.</p>}
   {data&&<>
@@ -70,7 +70,7 @@ function AgentsPage(){
    <section className="space-y-2"><h2 className="font-semibold">Recommendations ({recommendations.length})</h2>
     {recommendations.length===0&&<p className="text-sm text-muted-foreground">No recommendations recorded.</p>}
     {recommendations.map(r=><article key={r.id} className="space-y-2 rounded border p-3 text-sm">
-     <strong>{r.title}</strong><p className="text-xs text-muted-foreground">{data.agents.find(a=>a.agent_key===r.agent_key)?.name??r.agent_key} · {r.status}</p>
+     <strong>{r.title}</strong><p className="text-xs text-muted-foreground">{data.agents.find(a=>a.agent_key===r.agent_key)?.name??r.agent_key} · {r.status} · {r.generation_method==="openai"?"AI-generated":"Human-authored"}{r.model_name?` · ${r.model_name}`:""}</p>
      <p>{r.recommendation}</p><p className="text-xs"><strong>Sources:</strong> {r.source_references}</p>
      {r.review_rationale&&<p className="text-xs"><strong>Review:</strong> {r.review_rationale}</p>}
      {canReview&&r.status==="submitted"&&r.created_by!==user.id&&<div className="space-y-2">
