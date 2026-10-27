@@ -2,6 +2,7 @@ export type CandidateFact = { key: string; value: string; excerpt: string };
 
 export function parseCandidateFacts(text: string, limit = 50): CandidateFact[] {
   const candidates: CandidateFact[] = [];
+  if (!Number.isFinite(limit) || limit <= 0) return candidates;
   const seen = new Set<string>();
   for (const raw of text.split(/\r?\n/)) {
     const line = raw.trim();
@@ -15,7 +16,7 @@ export function parseCandidateFacts(text: string, limit = 50): CandidateFact[] {
     if (seen.has(signature)) continue;
     seen.add(signature);
     candidates.push({ key, value, excerpt: line });
-    if (candidates.length >= limit) break;
+    if (candidates.length >= Math.max(0, Math.min(50, limit))) break;
   }
   return candidates;
 }
