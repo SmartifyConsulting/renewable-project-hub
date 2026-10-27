@@ -16,3 +16,4 @@
 - Memberships are admin-provisioned; never auto-create memberships or grant client writes.
 - Portfolio/project writes go only through SECURITY DEFINER RPCs (`rpos_upsert_portfolio`, `rpos_upsert_project`) that check auth.uid() + org role admin/director/manager and append an audit_events row; clients keep SELECT-only table grants.
 - Membership changes go only through admin-only SECURITY DEFINER RPCs (`rpos_set/remove_org_membership`, `rpos_set/remove_project_membership`): caller must be org admin, cannot change self, last org admin cannot be removed, and each change appends an audit event. Org-scoped audit rows (project_id NULL, organisation_id set) are readable by org admin/director/manager; project rows keep project-member visibility.
+- Real workspace pages under `_authenticated` that share a name with a demo page use a `-live` suffix (e.g. /agents-live), because two files claiming the same address break the page list.
