@@ -24,3 +24,18 @@ export type MembershipState = "has-access" | "no-membership";
 export function membershipState(orgCount: number, projectCount: number): MembershipState {
   return orgCount + projectCount > 0 ? "has-access" : "no-membership";
 }
+
+export const WRITER_ROLES = ["admin", "director", "manager"] as const;
+/** Mirrors private.rpos_can_write_org: only these org roles may create/edit portfolios and projects. */
+export function canWriteOrg(role: string | null | undefined): boolean {
+  return !!role && (WRITER_ROLES as readonly string[]).includes(role);
+}
+
+/** Maps database RPC errors to messages safe to show in forms. */
+export function mapRpcError(err: unknown): string {
+  const e = err as { code?: string; message?: string };
+  if (e?.code === "22023" || e?.code === "42501") return e.message ?? "Not allowed.";
+  if (e?.code === "PGRST202") return "This action is not available yet. Please refresh.";
+  console.error("[rpc]", err);
+  return "Could not save. Please try again.";
+}
