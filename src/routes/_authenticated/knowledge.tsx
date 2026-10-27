@@ -37,6 +37,7 @@ function KnowledgePage() {
   const [type,setType] = useState("document");
   const [uri,setUri] = useState("");
   const [description,setDescription] = useState("");
+  const [document,setDocument] = useState<File|null>(null);
   const [saving,setSaving] = useState(false);
   const [reviewing,setReviewing] = useState<string|null>(null);
   const [reviewNotes,setReviewNotes] = useState("");
@@ -49,13 +50,29 @@ function KnowledgePage() {
   const canReview = roles.some(r=>["admin","director"].includes(r));
   const refresh = ()=>qc.invalidateQueries({queryKey:["knowledge",user.id]});
   async function register() {
-    if(!selected || title.trim().length<3 || !uri.trim()) {toast.error("Select a project, title and source reference.");return;}
+    if(!selected || title.trim().length<3 || (!uri.trim() && !document)) {toast.error("Select a project, title and source reference or file.");return;}
+    if(document && (document.size>26214400 || !["application/pdf","text/plain","text/csv","application/vnd.openxmlformats-officedocument.wordprocessingml.document","application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"].includes(document.type))) {toast.error("Unsupported document format or file larger than 25 MiB.");return;}
     setSaving(true);
     try {
-      const {error}=await db.rpc("rpos_register_knowledge_source",{p_project_id:selected,p_title:title,p_source_type:type,p_source_uri:uri,p_description:description});
+      let sourceUri=uri.trim();
+      if(document){
+        const extension=document.name.split(".").pop()?.toLowerCase() ?? "bin";
+        const objectPath=`${selected}/${user.id}/${crypto.randomUUID()}.${extension}`;
+        const {error:uploadError}=await supabase.storage.from("rpos-knowledge").upload(objectPath,document,{contentType:document.type,upsert:false});
+        if(uploadError) throw uploadError;
+        sourceUri=`storage:rpos-knowledge/${objectPath}`;
+      }
+      const {error}=await db.rpc("rpos_register_knowledge_source",{p_project_id:selected,p_title:title,p_source_type:type,p_source_uri:sourceUri,p_description:description});
       if(error) throw error;
-      setTitle("");setUri("");setDescription("");await refresh();toast.success("Source registered");
+      setTitle("");setUri("");setDescription("");setDocument(null);await refresh();toast.success("Source registered");
     } catch(e) {toast.error(mapRpcError(e));} finally {setSaving(false);}
+  }
+  async function openSource(source:Source) {
+    if(!source.source_uri.startsWith("storage:rpos-knowledge/")) {toast.info("External source reference: "+source.source_uri);return;}
+    const objectPath=source.source_uri.slice("storage:rpos-knowledge/".length);
+    const {data,error}=await supabase.storage.from("rpos-knowledge").createSignedUrl(objectPath,60);
+    if(error || !data?.signedUrl){toast.error(mapRpcError(error));return;}
+    window.open(data.signedUrl,"_blank","noopener,noreferrer");
   }
   async function review(id:string) {
     if(reviewNotes.trim().length<10){toast.error("Review rationale must contain at least 10 characters.");return;}
@@ -70,7 +87,7 @@ function KnowledgePage() {
     <WorkspaceHeader email={user.email} onSignOut={signOut}/>
     <main className="mx-auto max-w-5xl space-y-5 px-5 py-6">
       <h1 className="font-display text-2xl font-semibold">Renewable Knowledge Intelligence</h1>
-      <p className="text-sm text-muted-foreground">Register project evidence, manage independent reviews and establish a traceable source inventory. Source references are metadata; document upload and automated extraction are not yet enabled.</p>
+      <p className="text-sm text-muted-foreground">Register project evidence, manage independent reviews and establish a traceable source inventory. Private document upload and evidence review are available. Automated extraction is not yet enabled.</p>
       {query.isLoading && <p>Loading knowledge sources…</p>}
       {query.error && <p role="alert" className="text-destructive">Knowledge registry unavailable. Apply migration 0008 to the database.</p>}
       {data && <><label className="block max-w-xl text-sm">Project
@@ -84,7 +101,10 @@ function KnowledgePage() {
         <select aria-label="Source type" className="rounded-md border bg-background p-2" value={type} onChange={e=>setType(e.target.value)}>
           {["document","permit","contract","report","dataset","correspondence","other"].map(t=><option key={t} value={t}>{t}</option>)}
         </select>
-        <Input aria-label="Source reference" placeholder="Document ID, repository path or source URL" value={uri} maxLength={2000} onChange={e=>setUri(e.target.value)}/>
+        <Input aria-label="Source reference" placeholder="Document ID, repository path or source URL" value={uri} maxLength={2000} disabled={!!document} onChange={e=>setUri(e.target.value)}/>
+        <label className="block text-sm">Or upload a private document (PDF, TXT, CSV, DOCX, XLSX; maximum 25 MiB)
+          <Input type="file" accept=".pdf,.txt,.csv,.docx,.xlsx" className="mt-1" onChange={e=>setDocument(e.target.files?.[0]??null)}/>
+        </label>
         <Textarea aria-label="Source description" placeholder="Source context" value={description} maxLength={4000} onChange={e=>setDescription(e.target.value)}/>
         <Button disabled={saving || !selected} onClick={register}>{saving?"Saving…":"Register source"}</Button>
       </section>}
@@ -94,6 +114,7 @@ function KnowledgePage() {
         {data.sources.filter(s=>s.project_id===selected).map(s=><article key={s.id} className="space-y-2 rounded-lg border p-4">
           <div className="flex flex-wrap items-center justify-between gap-2"><strong>{s.title}</strong><span className="text-xs uppercase">{s.status.replaceAll("_"," ")}</span></div>
           <p className="text-xs text-muted-foreground">{s.source_type} · {s.source_uri}</p>
+          {s.source_uri.startsWith("storage:rpos-knowledge/") && <Button size="sm" variant="outline" onClick={()=>openSource(s)}>Open private document</Button>}
           {s.description && <p className="text-sm">{s.description}</p>}
           {s.review_notes && <p className="text-xs">Review: {s.review_notes}</p>}
           {canReview && s.created_by!==user.id && <div className="space-y-2">
