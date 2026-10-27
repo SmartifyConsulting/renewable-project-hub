@@ -24,22 +24,26 @@ const ACTION = [["all", "All actions"], ["create", "Created"], ["update", "Updat
 
 type Filters = { entity: string; action: string; from: string; to: string };
 
-async function load(f: Filters) {
-  let q = supabase.from("audit_events").select("id, organisation_id, project_id, actor_user_id, action, entity_type, entity_id, before_state, after_state, occurred_at").order("occurred_at", { ascending: false }).limit(200);
+const PAGE_SIZE = 50;
+
+async function load(f: Filters, page: number) {
+  let q = supabase.from("audit_events").select("id, organisation_id, project_id, actor_user_id, action, entity_type, entity_id, before_state, after_state, occurred_at").order("occurred_at", { ascending: false }).order("id", { ascending: false }).range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
   if (f.entity !== "all") q = q.eq("entity_type", f.entity);
   if (f.action !== "all") q = q.eq("action", f.action);
   if (f.from) q = q.gte("occurred_at", f.from);
   if (f.to) q = q.lte("occurred_at", `${f.to}T23:59:59.999Z`);
   const { data, error } = await q;
   if (error) throw error;
-  return data ?? [];
+  return { rows: (data ?? []).slice(0, PAGE_SIZE), hasNext: (data ?? []).length > PAGE_SIZE };
 }
 
 function Audit() {
   const { user } = Route.useRouteContext();
   const signOut = useSignOut();
   const [f, setF] = useState<Filters>({ entity: "all", action: "all", from: "", to: "" });
-  const q = useQuery({ queryKey: ["audit", f], queryFn: () => load(f) });
+  const [page, setPage] = useState(0);
+  const updateFilters = (next: Filters) => { setF(next); setPage(0); setOpen(null); };
+  const q = useQuery({ queryKey: ["audit", f, page], queryFn: () => load(f, page) });
   const [open, setOpen] = useState<number | null>(null);
   const sel = "h-8 rounded-md border bg-background px-2 text-xs";
 
@@ -52,11 +56,12 @@ function Audit() {
           <p className="text-sm text-muted-foreground">Project changes are visible to project members. Portfolio and organisation membership changes are visible to organisation admins, directors and managers. Entries cannot be edited or deleted.</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <select aria-label="Record type" className={sel} value={f.entity} onChange={(e) => setF({ ...f, entity: e.target.value })}>{ENTITY.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select>
-          <select aria-label="Action" className={sel} value={f.action} onChange={(e) => setF({ ...f, action: e.target.value })}>{ACTION.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select>
-          <Input aria-label="From date" type="date" className="h-8 w-40 text-xs" value={f.from} onChange={(e) => setF({ ...f, from: e.target.value })} />
-          <Input aria-label="To date" type="date" className="h-8 w-40 text-xs" value={f.to} onChange={(e) => setF({ ...f, to: e.target.value })} />
+          <select aria-label="Record type" className={sel} value={f.entity} onChange={(e) => updateFilters({ ...f, entity: e.target.value })}>{ENTITY.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select>
+          <select aria-label="Action" className={sel} value={f.action} onChange={(e) => updateFilters({ ...f, action: e.target.value })}>{ACTION.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select>
+          <Input aria-label="From date" type="date" className="h-8 w-40 text-xs" value={f.from} onChange={(e) => updateFilters({ ...f, from: e.target.value })} />
+          <Input aria-label="To date" type="date" className="h-8 w-40 text-xs" value={f.to} onChange={(e) => updateFilters({ ...f, to: e.target.value })} />
         </div>
+        <p className="text-xs text-muted-foreground">Showing up to {PAGE_SIZE} entries per page, newest first. Filters apply across the full audit history.</p>
         {q.isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
         {q.error && <p role="alert" className="text-sm text-destructive">Could not load audit history.</p>}
         {q.data && (
@@ -64,8 +69,8 @@ function Audit() {
             <table className="w-full text-xs">
               <thead className="bg-muted/60 text-left text-[11px] uppercase text-muted-foreground"><tr>{["When", "Record", "Action", "Record ID", "By", ""].map((h, i) => <th key={i} className="px-3 py-2">{h}</th>)}</tr></thead>
               <tbody className="divide-y">
-                {q.data.length === 0 && <tr><td colSpan={6} className="px-3 py-6 text-center text-muted-foreground">No audit entries match these filters.</td></tr>}
-                {q.data.map((e) => (
+                {q.data.rows.length === 0 && <tr><td colSpan={6} className="px-3 py-6 text-center text-muted-foreground">No audit entries match these filters.</td></tr>}
+                {q.data.rows.map((e) => (
                   <Fragment key={e.id}>
                     <tr>
                       <td className="whitespace-nowrap px-3 py-2">{new Date(e.occurred_at).toLocaleString()}</td>
@@ -87,6 +92,13 @@ function Audit() {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+        {q.data && (page > 0 || q.data.hasNext) && (
+          <div className="flex items-center justify-end gap-3">
+            <button type="button" className="rounded border px-3 py-1.5 text-xs disabled:opacity-40" disabled={page === 0 || q.isFetching} onClick={() => { setPage((p) => Math.max(0, p - 1)); setOpen(null); }}>Previous</button>
+            <span className="text-xs text-muted-foreground">Page {page + 1}</span>
+            <button type="button" className="rounded border px-3 py-1.5 text-xs disabled:opacity-40" disabled={!q.data.hasNext || q.isFetching} onClick={() => { setPage((p) => p + 1); setOpen(null); }}>Next</button>
           </div>
         )}
       </main>
