@@ -18,7 +18,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 
-const REAL_PATHS = ["/auth", "/forgot-password", "/reset-password", "/workspace"];
+const REAL_PATHS = ["/auth", "/forgot-password", "/reset-password", "/workspace", "/members", "/audit"];
 
 function NotFoundComponent() {
   return (

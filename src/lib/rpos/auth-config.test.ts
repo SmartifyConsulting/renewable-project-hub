@@ -30,3 +30,12 @@ describe("write permissions", () => {
     expect(mapRpcError({ code: "XX000", message: "internal detail" })).toBe("Could not save. Please try again.");
   });
 });
+
+import { parseUserId } from "./auth-config";
+describe("adding members by user ID", () => {
+  it("accepts a valid account ID and rejects anything else", () => {
+    expect(parseUserId(" 3F2504E0-4F89-11D3-9A0C-0305E82C3301 ")).toBe("3f2504e0-4f89-11d3-9a0c-0305e82c3301");
+    expect(parseUserId("jane@example.com")).toBeNull();
+    expect(parseUserId("")).toBeNull();
+  });
+});
