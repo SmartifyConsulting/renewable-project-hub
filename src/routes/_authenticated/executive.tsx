@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {createFileRoute} from "@tanstack/react-router";
+import {createFileRoute,Link} from "@tanstack/react-router";
 import {useQuery} from "@tanstack/react-query";
 import {Button} from "@/components/ui/button";
 import {supabase} from "@/integrations/supabase/client";
@@ -30,6 +30,7 @@ function ExecutivePage(){
  const visible=portfolioProjects.filter(k=>projectId==="all"||k.project_id===projectId);
  const sum=(key:keyof Kpi)=>visible.reduce((acc,k)=>acc+Number(k[key]??0),0);
  const activationTotal=sum("activation_total"),scheduleTotal=sum("schedule_total");
+ const exceptions=visible.filter(k=>Number(k.critical_ncrs)>0||Number(k.schedule_overdue)>0||Number(k.activation_blocked)>0);
  const percent=(done:number,total:number)=>total?Math.round(done/total*100):null;
  function exportCsv(){
   const cols=["project_name","project_id",...metrics.map(([key])=>key)] as (keyof Kpi)[];
@@ -57,6 +58,12 @@ function ExecutivePage(){
     <div className="rounded border p-4"><strong className="text-2xl">{percent(sum("activation_completed"),activationTotal)??"—"}{activationTotal?"%":""}</strong><p className="text-sm">Activation completion</p></div>
     <div className="rounded border p-4"><strong className="text-2xl">{percent(sum("schedule_completed"),scheduleTotal)??"—"}{scheduleTotal?"%":""}</strong><p className="text-sm">Schedule completion</p></div>
    </div>
+   <section className="space-y-3 rounded border p-4" aria-label="Portfolio exceptions">
+    <h2 className="font-semibold">Projects requiring attention ({exceptions.length})</h2>
+    <p className="text-xs text-muted-foreground">Indicators are based on existing records, not an approved risk rating. Verify underlying records before acting.</p>
+    {exceptions.length===0&&<p className="text-sm text-muted-foreground">No blocked activation items, overdue schedule activities or critical NCRs in this selection.</p>}
+    {exceptions.map(k=><div key={k.project_id} className="flex flex-wrap items-center justify-between gap-3 rounded border p-3 text-sm"><div><strong>{k.project_name}</strong><p className="text-xs text-muted-foreground">Blocked activation: {k.activation_blocked} · Overdue schedule: {k.schedule_overdue} · Critical NCRs: {k.critical_ncrs}</p></div><div className="flex gap-3"><Link to="/activation-live" className="text-primary underline">Activation</Link><Link to="/schedule" className="text-primary underline">Schedule</Link><Link to="/assurance-live" className="text-primary underline">Assurance</Link></div></div>)}
+   </section>
    <section className="grid gap-2 sm:grid-cols-3 lg:grid-cols-4">
     {metrics.map(([key,label])=><div key={key} className="rounded border p-3"><strong className="text-xl tabular-nums">{sum(key)}</strong><p className="text-xs text-muted-foreground">{label}</p></div>)}
    </section>
