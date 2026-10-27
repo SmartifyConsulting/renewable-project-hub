@@ -11,10 +11,13 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ActivationRouteImport } from './routes/activation'
+import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as AssuranceRouteImport } from './routes/assurance'
 import { Route as DeliveryRouteImport } from './routes/delivery'
 import { Route as IntelligenceRouteImport } from './routes/intelligence'
+import { Route as KnowledgeRouteImport } from './routes/knowledge'
 import { Route as ReadinessRouteImport } from './routes/readiness'
+import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as RkiRouteImport } from './routes/rki'
 import { Route as PortfoliosIndexRouteImport } from './routes/portfolios.index'
 import { Route as PortfoliosIdRouteImport } from './routes/portfolios.$id'
@@ -32,6 +35,11 @@ const ActivationRoute = ActivationRouteImport.update({
   path: '/activation',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AgentsRoute = AgentsRouteImport.update({
+  id: '/agents',
+  path: '/agents',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AssuranceRoute = AssuranceRouteImport.update({
   id: '/assurance',
   path: '/assurance',
@@ -47,9 +55,19 @@ const IntelligenceRoute = IntelligenceRouteImport.update({
   path: '/intelligence',
   getParentRoute: () => rootRouteImport,
 } as any)
+const KnowledgeRoute = KnowledgeRouteImport.update({
+  id: '/knowledge',
+  path: '/knowledge',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReadinessRoute = ReadinessRouteImport.update({
   id: '/readiness',
   path: '/readiness',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportsRoute = ReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RkiRoute = RkiRouteImport.update({
@@ -86,10 +104,13 @@ const RecordsIdRoute = RecordsIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/activation': typeof ActivationRoute
+  '/agents': typeof AgentsRoute
   '/assurance': typeof AssuranceRoute
   '/delivery': typeof DeliveryRoute
   '/intelligence': typeof IntelligenceRoute
+  '/knowledge': typeof KnowledgeRoute
   '/readiness': typeof ReadinessRoute
+  '/reports': typeof ReportsRoute
   '/rki': typeof RkiRoute
   '/portfolios/$id': typeof PortfoliosIdRoute
   '/projects/$id': typeof ProjectsIdRoute
@@ -100,10 +121,13 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/activation': typeof ActivationRoute
+  '/agents': typeof AgentsRoute
   '/assurance': typeof AssuranceRoute
   '/delivery': typeof DeliveryRoute
   '/intelligence': typeof IntelligenceRoute
+  '/knowledge': typeof KnowledgeRoute
   '/readiness': typeof ReadinessRoute
+  '/reports': typeof ReportsRoute
   '/rki': typeof RkiRoute
   '/portfolios/$id': typeof PortfoliosIdRoute
   '/projects/$id': typeof ProjectsIdRoute
@@ -115,10 +139,13 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/activation': typeof ActivationRoute
+  '/agents': typeof AgentsRoute
   '/assurance': typeof AssuranceRoute
   '/delivery': typeof DeliveryRoute
   '/intelligence': typeof IntelligenceRoute
+  '/knowledge': typeof KnowledgeRoute
   '/readiness': typeof ReadinessRoute
+  '/reports': typeof ReportsRoute
   '/rki': typeof RkiRoute
   '/portfolios/$id': typeof PortfoliosIdRoute
   '/projects/$id': typeof ProjectsIdRoute
@@ -131,10 +158,13 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/activation'
+    | '/agents'
     | '/assurance'
     | '/delivery'
     | '/intelligence'
+    | '/knowledge'
     | '/readiness'
+    | '/reports'
     | '/rki'
     | '/portfolios/$id'
     | '/projects/$id'
@@ -145,10 +175,13 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/activation'
+    | '/agents'
     | '/assurance'
     | '/delivery'
     | '/intelligence'
+    | '/knowledge'
     | '/readiness'
+    | '/reports'
     | '/rki'
     | '/portfolios/$id'
     | '/projects/$id'
@@ -159,10 +192,13 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/activation'
+    | '/agents'
     | '/assurance'
     | '/delivery'
     | '/intelligence'
+    | '/knowledge'
     | '/readiness'
+    | '/reports'
     | '/rki'
     | '/portfolios/$id'
     | '/projects/$id'
@@ -174,10 +210,13 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ActivationRoute: typeof ActivationRoute
+  AgentsRoute: typeof AgentsRoute
   AssuranceRoute: typeof AssuranceRoute
   DeliveryRoute: typeof DeliveryRoute
   IntelligenceRoute: typeof IntelligenceRoute
+  KnowledgeRoute: typeof KnowledgeRoute
   ReadinessRoute: typeof ReadinessRoute
+  ReportsRoute: typeof ReportsRoute
   RkiRoute: typeof RkiRoute
   PortfoliosIdRoute: typeof PortfoliosIdRoute
   ProjectsIdRoute: typeof ProjectsIdRoute
@@ -202,6 +241,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ActivationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/agents': {
+      id: '/agents'
+      path: '/agents'
+      fullPath: '/agents'
+      preLoaderRoute: typeof AgentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/assurance': {
       id: '/assurance'
       path: '/assurance'
@@ -223,11 +269,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IntelligenceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/knowledge': {
+      id: '/knowledge'
+      path: '/knowledge'
+      fullPath: '/knowledge'
+      preLoaderRoute: typeof KnowledgeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/readiness': {
       id: '/readiness'
       path: '/readiness'
       fullPath: '/readiness'
       preLoaderRoute: typeof ReadinessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports': {
+      id: '/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof ReportsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/rki': {
@@ -278,10 +338,13 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ActivationRoute: ActivationRoute,
+  AgentsRoute: AgentsRoute,
   AssuranceRoute: AssuranceRoute,
   DeliveryRoute: DeliveryRoute,
   IntelligenceRoute: IntelligenceRoute,
+  KnowledgeRoute: KnowledgeRoute,
   ReadinessRoute: ReadinessRoute,
+  ReportsRoute: ReportsRoute,
   RkiRoute: RkiRoute,
   PortfoliosIdRoute: PortfoliosIdRoute,
   ProjectsIdRoute: ProjectsIdRoute,
