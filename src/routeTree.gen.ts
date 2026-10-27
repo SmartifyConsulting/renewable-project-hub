@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ActivationRouteImport } from './routes/activation'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as AssuranceRouteImport } from './routes/assurance'
 import { Route as DeliveryRouteImport } from './routes/delivery'
@@ -33,6 +34,11 @@ const IndexRoute = IndexRouteImport.update({
 const ActivationRoute = ActivationRouteImport.update({
   id: '/activation',
   path: '/activation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AgentsRoute = AgentsRouteImport.update({
@@ -104,6 +110,7 @@ const RecordsIdRoute = RecordsIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/activation': typeof ActivationRoute
+  '/admin': typeof AdminRoute
   '/agents': typeof AgentsRoute
   '/assurance': typeof AssuranceRoute
   '/delivery': typeof DeliveryRoute
@@ -121,6 +128,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/activation': typeof ActivationRoute
+  '/admin': typeof AdminRoute
   '/agents': typeof AgentsRoute
   '/assurance': typeof AssuranceRoute
   '/delivery': typeof DeliveryRoute
@@ -139,6 +147,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/activation': typeof ActivationRoute
+  '/admin': typeof AdminRoute
   '/agents': typeof AgentsRoute
   '/assurance': typeof AssuranceRoute
   '/delivery': typeof DeliveryRoute
@@ -158,6 +167,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/activation'
+    | '/admin'
     | '/agents'
     | '/assurance'
     | '/delivery'
@@ -175,6 +185,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/activation'
+    | '/admin'
     | '/agents'
     | '/assurance'
     | '/delivery'
@@ -192,6 +203,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/activation'
+    | '/admin'
     | '/agents'
     | '/assurance'
     | '/delivery'
@@ -210,6 +222,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ActivationRoute: typeof ActivationRoute
+  AdminRoute: typeof AdminRoute
   AgentsRoute: typeof AgentsRoute
   AssuranceRoute: typeof AssuranceRoute
   DeliveryRoute: typeof DeliveryRoute
@@ -239,6 +252,13 @@ declare module '@tanstack/react-router' {
       path: '/activation'
       fullPath: '/activation'
       preLoaderRoute: typeof ActivationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/agents': {
@@ -338,6 +358,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ActivationRoute: ActivationRoute,
+  AdminRoute: AdminRoute,
   AgentsRoute: AgentsRoute,
   AssuranceRoute: AssuranceRoute,
   DeliveryRoute: DeliveryRoute,
