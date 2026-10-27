@@ -11,17 +11,19 @@ import {canWriteOrg,mapRpcError} from "@/lib/rpos/auth-config";
 export const Route=createFileRoute("/_authenticated/activation")({component:ActivationPage});
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db=supabase as any;
-type Item={id:string;project_id:string;title:string;workstream:string;item_type:string;status:string;day_number:number;owner_user_id:string|null;depends_on:string|null;notes:string};
+type Acceptance={item_id:string;project_id:string;accepted_by:string;accepted_at:string;rationale:string};
+type Item={id:string;project_id:string;title:string;workstream:string;item_type:string;status:string;day_number:number;owner_user_id:string|null;depends_on:string|null;notes:string;created_by:string};
 async function load(userId:string){
- const [projects,portfolios,memberships,items]=await Promise.all([
+ const [projects,portfolios,memberships,items,acceptances]=await Promise.all([
   supabase.from("projects").select("id,name,portfolio_id").order("name"),
   supabase.from("portfolios").select("id,org_id"),
   supabase.from("organisation_memberships").select("organisation_id,role").eq("user_id",userId),
-  db.from("rpos_activation_items").select("id,project_id,title,workstream,item_type,status,day_number,owner_user_id,depends_on,notes").order("day_number")
+  db.from("rpos_activation_items").select("id,project_id,title,workstream,item_type,status,day_number,owner_user_id,depends_on,notes,created_by").order("day_number"),
+  db.from("rpos_activation_acceptances").select("item_id,project_id,accepted_by,accepted_at,rationale")
  ]);
- const error=projects.error??portfolios.error??memberships.error??items.error;
+ const error=projects.error??portfolios.error??memberships.error??items.error??acceptances.error;
  if(error)throw error;
- return {projects:projects.data??[],portfolios:portfolios.data??[],memberships:memberships.data??[],items:(items.data??[]) as Item[]};
+ return {projects:projects.data??[],portfolios:portfolios.data??[],memberships:memberships.data??[],items:(items.data??[]) as Item[],acceptances:(acceptances.data??[]) as Acceptance[]};
 }
 const empty={title:"",workstream:"Governance",item_type:"task",status:"not_started",day_number:1,owner_user_id:"",depends_on:"",notes:""};
 function ActivationPage(){
@@ -29,14 +31,24 @@ function ActivationPage(){
  const query=useQuery({queryKey:["activation",user.id],queryFn:()=>load(user.id)});
  const [projectId,setProjectId]=useState("");const [editing,setEditing]=useState<string|null>(null);
  const [form,setForm]=useState(empty);const [saving,setSaving]=useState(false);
+ const [acceptId,setAcceptId]=useState<string|null>(null);const [acceptReason,setAcceptReason]=useState("");
  const data=query.data;const selected=projectId||data?.projects[0]?.id||"";
  const items=data?.items.filter(i=>i.project_id===selected)??[];
  const org=data?.portfolios.find(p=>p.id===data.projects.find(x=>x.id===selected)?.portfolio_id)?.org_id;
  const canEdit=data?.memberships.some(m=>m.organisation_id===org&&canWriteOrg(m.role))??false;
+ const canAccept=data?.memberships.some(m=>m.organisation_id===org&&["admin","director"].includes(m.role))??false;
  const completed=items.filter(i=>i.status==="completed").length;
  const blocked=items.filter(i=>i.status==="blocked").length;
  function edit(item:Item){setEditing(item.id);setForm({title:item.title,workstream:item.workstream,item_type:item.item_type,status:item.status,day_number:item.day_number,owner_user_id:item.owner_user_id??"",depends_on:item.depends_on??"",notes:item.notes});}
  function reset(){setEditing(null);setForm(empty);}
+ async function acceptMilestone(itemId:string){
+  if(acceptReason.trim().length<10){toast.error("Provide an acceptance rationale of at least 10 characters.");return;}
+  setSaving(true);
+  try{const {error}=await db.rpc("rpos_accept_activation_milestone",{p_item_id:itemId,p_rationale:acceptReason.trim()});
+   if(error)throw error;
+   setAcceptId(null);setAcceptReason("");await qc.invalidateQueries({queryKey:["activation",user.id]});toast.success("Milestone independently accepted");
+  }catch(e){toast.error(mapRpcError(e));}finally{setSaving(false);}
+ }
  async function save(){
   setSaving(true);
   try{
@@ -87,7 +99,14 @@ function ActivationPage(){
        <strong>{i.title}</strong>{i.depends_on&&<p className="text-xs">Depends on: {items.find(d=>d.id===i.depends_on)?.title??"Another item"}</p>}
        {i.owner_user_id&&<p className="text-xs">Owner: {i.owner_user_id}</p>}
        {i.notes&&<p className="text-sm">{i.notes}</p>}</div>
-      {canEdit&&<Button size="sm" variant="outline" onClick={()=>edit(i)}>Edit</Button>}
+      <div className="shrink-0 space-y-2">
+       {data.acceptances.some(a=>a.item_id===i.id)&&<p className="text-xs font-medium">Accepted</p>}
+       {canEdit&&!data.acceptances.some(a=>a.item_id===i.id)&&<Button size="sm" variant="outline" onClick={()=>edit(i)}>Edit</Button>}
+       {canAccept&&i.item_type==="milestone"&&i.status!=="completed"&&i.created_by!==user.id&&i.owner_user_id!==user.id&&<>
+        <Button size="sm" onClick={()=>setAcceptId(acceptId===i.id?null:i.id)}>Accept milestone</Button>
+        {acceptId===i.id&&<div className="w-64 space-y-2"><Textarea aria-label="Milestone acceptance rationale" maxLength={4000} value={acceptReason} onChange={e=>setAcceptReason(e.target.value)} placeholder="Acceptance findings and evidence"/><Button disabled={saving} size="sm" onClick={()=>acceptMilestone(i.id)}>Confirm acceptance</Button></div>}
+       </>}
+      </div>
      </article>)}
     </section></>}
   </main></div>;
