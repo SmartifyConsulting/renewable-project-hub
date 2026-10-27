@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { WorkspaceHeader, useSignOut } from "@/components/rpos/workspace-header";
 import { mapRpcError } from "@/lib/rpos/auth-config";
 import { parseCandidateFacts } from "@/lib/rpos/knowledge-extraction";
+import { extractPdfCandidates } from "@/lib/rpos/pdf-extract.functions";
 
 export const Route = createFileRoute("/_authenticated/knowledge-facts")({component: FactsPage});
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -47,6 +48,7 @@ function FactsPage(){
  const [reviewId,setReviewId]=useState("");
  const [reviewNotes,setReviewNotes]=useState("");
  const [saving,setSaving]=useState(false);
+ const [extracting,setExtracting]=useState(false);
  const data=query.data;
  const selected=projectId||data?.projects[0]?.id||"";
  const sources=data?.sources.filter(s=>s.project_id===selected)??[];
@@ -72,6 +74,20 @@ function FactsPage(){
    setBatch(rows.map(row=>row.excerpt).join("\n"));setImportName(file.name);
    toast.info("Review the extracted text before submitting candidates.");
   }catch{toast.error("File could not be read.");}
+ }
+ async function extractPdf(){
+  if(!selectedSource?.source_uri.toLowerCase().endsWith(".pdf")){toast.error("Select a registered PDF source.");return;}
+  setExtracting(true);
+  try{
+   const {data:session}=await supabase.auth.getSession();
+   if(!session.session?.access_token)throw new Error("Please sign in again.");
+   const result=await extractPdfCandidates({data:{source_id:activeSource},headers:{Authorization:"Bearer "+session.session.access_token}});
+   if(result.source_id!==activeSource)throw new Error("Source changed during extraction.");
+   if(!result.candidates.length){toast.info("No supported factual candidates found.");return;}
+   const rows=result.candidates.map(c=>c.key+": "+c.value);
+   setBatch(rows.join("\n"));setImportName("AI draft from "+selectedSource.title);
+   toast.info("AI suggestions require checking against the original PDF and independent review. Page and excerpt references are not yet saved with bulk candidates.");
+  }catch(e){toast.error(mapRpcError(e));}finally{setExtracting(false);}
  }
  async function submit(){
   if(!activeSource){toast.error("Select a source first.");return;}
@@ -117,6 +133,7 @@ function FactsPage(){
     {selectedSource&&<div className="rounded border p-3 text-sm"><strong>Selected evidence:</strong> {selectedSource.title} · Source review: <strong>{selectedSource.status.replaceAll("_"," ")}</strong><p className="mt-1 break-all text-xs text-muted-foreground">{selectedSource.source_uri}</p><p className="mt-1 text-xs text-muted-foreground">Fact acceptance is independent of source verification. Both must be checked before relying on evidence.</p></div>}
     {canWrite&&<section className="space-y-2 rounded-lg border p-4">
      <h2 className="font-semibold">Stage facts for review</h2>
+     {selectedSource?.source_uri.toLowerCase().endsWith(".pdf")&&<Button variant="outline" disabled={extracting||saving} onClick={extractPdf}>{extracting?"Extracting PDF…":"Suggest facts from registered PDF (AI)"}</Button>}
      <Input aria-label="Fact key" placeholder="Fact name (e.g. Grid connection capacity)" value={key} onChange={e=>setKey(e.target.value)}/>
      <Input aria-label="Fact value" placeholder="Fact value" value={value} onChange={e=>setValue(e.target.value)}/>
      <Textarea aria-label="Supporting excerpt" placeholder="Verbatim source excerpt and page reference" value={excerpt} maxLength={4000} onChange={e=>setExcerpt(e.target.value)}/>
