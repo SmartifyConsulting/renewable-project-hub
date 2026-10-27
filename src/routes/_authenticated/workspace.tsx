@@ -27,7 +27,7 @@ async function loadWorkspace(userId: string) {
   ]);
   const err = orgs.error ?? pms.error ?? projects.error;
   if (err) throw err;
-  return { orgCount: orgs.data.length, projectMemberships: pms.data.length, projects: projects.data };
+  return { orgCount: orgs.data?.length ?? 0, projectMemberships: pms.data?.length ?? 0, projects: projects.data ?? [] };
 }
 
 function Workspace() {
