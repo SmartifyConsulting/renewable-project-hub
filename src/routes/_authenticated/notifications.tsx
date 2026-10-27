@@ -23,7 +23,7 @@ function NotificationsPage(){
  {query.isSuccess&&items.length===0&&<p>No active notifications.</p>}
  <div className="space-y-2">{items.map(n=><article key={n.notification_key} className="flex flex-wrap items-start justify-between gap-3 rounded border p-3 text-sm">
  <div className="space-y-1"><strong>{n.title}</strong><p>{n.message} · {n.severity}</p><p className="text-xs text-muted-foreground">Project {n.project_id} · {new Date(n.occurred_at).toLocaleDateString()}</p>
- <Link className="text-primary underline" to={n.category==="approval"?"/agents":n.category==="schedule"?"/schedule":"/delivery"}>Open workspace</Link></div>
+ <Link className="text-primary underline" to={n.category==="approval"?"/agents-live":n.category==="schedule"?"/schedule":"/delivery-live"}>Open workspace</Link></div>
  <Button size="sm" variant="outline" disabled={n.is_read} onClick={()=>mark(n)}>{n.is_read?"Read":"Mark read"}</Button>
  </article>)}</div>
  </main></div>;
