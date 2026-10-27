@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { LogOut, Pencil, Plus } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { UserIdBadge, WorkspaceHeader } from "@/components/rpos/workspace-header";
 import { canWriteOrg, mapRpcError, membershipState } from "@/lib/rpos/auth-config";
 
 export const Route = createFileRoute("/_authenticated/workspace")({
