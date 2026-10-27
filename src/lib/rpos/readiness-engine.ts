@@ -26,7 +26,7 @@ export function evaluateReadiness(domains: ReadinessDomainInput[]): ReadinessRec
       Math.abs(domains.reduce((sum, d) => sum + d.weight, 0) - 100) > 0.0001) {
     reasons.push("Domain weights must be positive and total 100%.");
   }
-  if (domains.some((d) => d.score === null || !Number.isFinite(d.score) || d.score < 0 || d.score > 5)) {
+  if (domains.some((d) => d.score === null || !Number.isFinite(d.score) || d.score < 0 || d.score > 5 || !Number.isInteger(d.score * 2))) {
     reasons.push("Every domain requires a valid score between 0 and 5.");
   }
   if (reasons.length) return { overall: null, result: "INCOMPLETE", reasons, requiresHumanApproval: true };
