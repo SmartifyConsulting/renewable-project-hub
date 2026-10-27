@@ -8,6 +8,7 @@ import { Meter, ResultBadge, StatusBadge } from "@/components/rpos/status";
 import { ActivityFeed, Gantt, Grid, MiniList } from "@/components/rpos/viz";
 import { Register } from "@/components/rpos/register";
 import { cn } from "@/lib/utils";
+import { OrgChart } from "@/components/rpos/org-chart";
 
 const SECTIONS = [
   ["overview", "Overview"], ["profile", "Profile"], ["objectives", "Objectives & investment intent"], ["organisation", "Organisation"], ["stakeholders", "Stakeholders"], ["governance", "Governance"], ["commercial", "Contract & commercial"], ["lifecycle", "Lifecycle & stage gates"], ["plan", "Plan & milestones"], ["workpackages", "Work packages"], ["requirements", "Requirements"], ["documents", "Documents & evidence"], ["risks", "Risks & issues"], ["decisions", "Decisions"], ["actions", "Actions"], ["dependencies", "Dependencies"], ["change", "Change control"], ["reporting", "Reporting"], ["activity", "Activity & audit"],
@@ -137,20 +138,3 @@ function Lifecycle({ idx }: { idx: number }) {
   );
 }
 
-export function OrgChart({ director, manager }: { director: string; manager: string }) {
-  const leads = [["Grid & Electrical", "Dr. Marco Rossi"], ["Delivery", "Sipho Ndlovu"], ["Assurance", "Claire Bennett"], ["PMO", "Aisha Patel"], ["Knowledge", "Lerato Dlamini"]];
-  const Box = ({ t, n, dark }: { t: string; n: string; dark?: boolean }) => <div className={cn("rounded-md border px-3 py-2 text-center text-xs", dark ? "bg-navy text-navy-foreground" : "bg-card")}><div className="font-semibold">{n}</div><div className={dark ? "text-navy-foreground/70" : "text-muted-foreground"}>{t}</div></div>;
-  return (
-    <Panel title="Project organisation">
-      <div className="flex flex-col items-center gap-3">
-        <Box t="Project Sponsor / Executive" n="Richard Okafor" dark />
-        <span className="h-4 w-px bg-border" />
-        <Box t="Project Director" n={director} dark />
-        <span className="h-4 w-px bg-border" />
-        <Box t="Project Manager" n={manager} />
-        <span className="h-4 w-px bg-border" />
-        <div className="grid w-full grid-cols-2 gap-2 md:grid-cols-5">{leads.map(([t, n]) => <Box key={t} t={`${t} lead`} n={n} />)}</div>
-      </div>
-    </Panel>
-  );
-}
