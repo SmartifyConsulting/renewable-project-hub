@@ -66,6 +66,13 @@ export type Database = {
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "audit_events_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "rpos_executive_project_kpis"
+            referencedColumns: ["project_id"]
+          },
         ]
       }
       canonical_objects: {
@@ -131,6 +138,13 @@ export type Database = {
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "canonical_objects_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "rpos_executive_project_kpis"
+            referencedColumns: ["project_id"]
+          },
         ]
       }
       evidence_references: {
@@ -188,6 +202,13 @@ export type Database = {
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "evidence_references_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "rpos_executive_project_kpis"
+            referencedColumns: ["project_id"]
+          },
         ]
       }
       object_relationships: {
@@ -238,6 +259,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "object_relationships_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "rpos_executive_project_kpis"
+            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "object_relationships_source_object_id_fkey"
@@ -382,6 +410,13 @@ export type Database = {
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "project_memberships_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "rpos_executive_project_kpis"
+            referencedColumns: ["project_id"]
+          },
         ]
       }
       projects: {
@@ -459,11 +494,1219 @@ export type Database = {
         }
         Relationships: []
       }
+      readiness_domain_assessments: {
+        Row: {
+          domain_id: string
+          evidence_notes: string
+          evidence_verified: boolean
+          hard_stop: boolean
+          project_id: string
+          score: number | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          domain_id: string
+          evidence_notes?: string
+          evidence_verified?: boolean
+          hard_stop?: boolean
+          project_id: string
+          score?: number | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          domain_id?: string
+          evidence_notes?: string
+          evidence_verified?: boolean
+          hard_stop?: boolean
+          project_id?: string
+          score?: number | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "readiness_domain_assessments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "readiness_domain_assessments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "rpos_executive_project_kpis"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
+      readiness_gate_decisions: {
+        Row: {
+          decided_at: string
+          decided_by: string
+          decision: string
+          domain_snapshot: Json
+          id: number
+          project_id: string
+          rationale: string
+          snapshot_updated_at: string
+        }
+        Insert: {
+          decided_at?: string
+          decided_by: string
+          decision: string
+          domain_snapshot: Json
+          id?: never
+          project_id: string
+          rationale: string
+          snapshot_updated_at: string
+        }
+        Update: {
+          decided_at?: string
+          decided_by?: string
+          decision?: string
+          domain_snapshot?: Json
+          id?: never
+          project_id?: string
+          rationale?: string
+          snapshot_updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "readiness_gate_decisions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "readiness_gate_decisions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "rpos_executive_project_kpis"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
+      rpos_activation_acceptances: {
+        Row: {
+          accepted_at: string
+          accepted_by: string
+          item_id: string
+          project_id: string
+          rationale: string
+        }
+        Insert: {
+          accepted_at?: string
+          accepted_by: string
+          item_id: string
+          project_id: string
+          rationale: string
+        }
+        Update: {
+          accepted_at?: string
+          accepted_by?: string
+          item_id?: string
+          project_id?: string
+          rationale?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rpos_activation_acceptances_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: true
+            referencedRelation: "rpos_activation_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rpos_activation_acceptances_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rpos_activation_acceptances_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "rpos_executive_project_kpis"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
+      rpos_activation_items: {
+        Row: {
+          created_at: string
+          created_by: string
+          day_number: number
+          depends_on: string | null
+          id: string
+          item_type: string
+          notes: string
+          owner_user_id: string | null
+          project_id: string
+          status: string
+          title: string
+          updated_at: string
+          workstream: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          day_number: number
+          depends_on?: string | null
+          id?: string
+          item_type: string
+          notes?: string
+          owner_user_id?: string | null
+          project_id: string
+          status?: string
+          title: string
+          updated_at?: string
+          workstream: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          day_number?: number
+          depends_on?: string | null
+          id?: string
+          item_type?: string
+          notes?: string
+          owner_user_id?: string | null
+          project_id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          workstream?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rpos_activation_items_depends_on_fkey"
+            columns: ["depends_on"]
+            isOneToOne: false
+            referencedRelation: "rpos_activation_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rpos_activation_items_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rpos_activation_items_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "rpos_executive_project_kpis"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
+      rpos_ai_agent_settings: {
+        Row: {
+          agent_key: string
+          enabled: boolean
+          organisation_id: string
+          reason: string
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          agent_key: string
+          enabled?: boolean
+          organisation_id: string
+          reason: string
+          updated_at?: string
+          updated_by: string
+        }
+        Update: {
+          agent_key?: string
+          enabled?: boolean
+          organisation_id?: string
+          reason?: string
+          updated_at?: string
+          updated_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rpos_ai_agent_settings_agent_key_fkey"
+            columns: ["agent_key"]
+            isOneToOne: false
+            referencedRelation: "rpos_ai_agents"
+            referencedColumns: ["agent_key"]
+          },
+        ]
+      }
+      rpos_ai_agents: {
+        Row: {
+          agent_key: string
+          created_at: string
+          domain: string
+          enabled: boolean
+          name: string
+          purpose: string
+        }
+        Insert: {
+          agent_key: string
+          created_at?: string
+          domain: string
+          enabled?: boolean
+          name: string
+          purpose: string
+        }
+        Update: {
+          agent_key?: string
+          created_at?: string
+          domain?: string
+          enabled?: boolean
+          name?: string
+          purpose?: string
+        }
+        Relationships: []
+      }
+      rpos_ai_recommendations: {
+        Row: {
+          agent_key: string
+          created_at: string
+          created_by: string
+          generated_at: string | null
+          generation_method: string
+          id: string
+          model_name: string | null
+          project_id: string
+          recommendation: string
+          review_rationale: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          source_references: string
+          status: string
+          title: string
+        }
+        Insert: {
+          agent_key: string
+          created_at?: string
+          created_by: string
+          generated_at?: string | null
+          generation_method?: string
+          id?: string
+          model_name?: string | null
+          project_id: string
+          recommendation: string
+          review_rationale?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_references: string
+          status?: string
+          title: string
+        }
+        Update: {
+          agent_key?: string
+          created_at?: string
+          created_by?: string
+          generated_at?: string | null
+          generation_method?: string
+          id?: string
+          model_name?: string | null
+          project_id?: string
+          recommendation?: string
+          review_rationale?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_references?: string
+          status?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rpos_ai_recommendations_agent_key_fkey"
+            columns: ["agent_key"]
+            isOneToOne: false
+            referencedRelation: "rpos_ai_agents"
+            referencedColumns: ["agent_key"]
+          },
+          {
+            foreignKeyName: "rpos_ai_recommendations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rpos_ai_recommendations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "rpos_executive_project_kpis"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
+      rpos_assurance_inspections: {
+        Row: {
+          created_at: string
+          discipline: string
+          findings: string
+          id: string
+          inspection_date: string
+          inspector_user_id: string
+          project_id: string
+          reference: string
+          result: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          discipline: string
+          findings?: string
+          id?: string
+          inspection_date: string
+          inspector_user_id: string
+          project_id: string
+          reference: string
+          result?: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          discipline?: string
+          findings?: string
+          id?: string
+          inspection_date?: string
+          inspector_user_id?: string
+          project_id?: string
+          reference?: string
+          result?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rpos_assurance_inspections_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rpos_assurance_inspections_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "rpos_executive_project_kpis"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
+      rpos_assurance_ncrs: {
+        Row: {
+          corrective_action: string
+          created_at: string
+          created_by: string
+          description: string
+          due_date: string | null
+          id: string
+          inspection_id: string
+          owner_user_id: string | null
+          project_id: string
+          reference: string
+          severity: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          corrective_action?: string
+          created_at?: string
+          created_by: string
+          description: string
+          due_date?: string | null
+          id?: string
+          inspection_id: string
+          owner_user_id?: string | null
+          project_id: string
+          reference: string
+          severity: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          corrective_action?: string
+          created_at?: string
+          created_by?: string
+          description?: string
+          due_date?: string | null
+          id?: string
+          inspection_id?: string
+          owner_user_id?: string | null
+          project_id?: string
+          reference?: string
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rpos_assurance_ncrs_inspection_id_fkey"
+            columns: ["inspection_id"]
+            isOneToOne: false
+            referencedRelation: "rpos_assurance_inspections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rpos_assurance_ncrs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rpos_assurance_ncrs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "rpos_executive_project_kpis"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
+      rpos_assurance_verifications: {
+        Row: {
+          ncr_id: string
+          project_id: string
+          verification_notes: string
+          verified_at: string
+          verified_by: string
+        }
+        Insert: {
+          ncr_id: string
+          project_id: string
+          verification_notes: string
+          verified_at?: string
+          verified_by: string
+        }
+        Update: {
+          ncr_id?: string
+          project_id?: string
+          verification_notes?: string
+          verified_at?: string
+          verified_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rpos_assurance_verifications_ncr_id_fkey"
+            columns: ["ncr_id"]
+            isOneToOne: true
+            referencedRelation: "rpos_assurance_ncrs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rpos_assurance_verifications_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rpos_assurance_verifications_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "rpos_executive_project_kpis"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
+      rpos_delivery_approvals: {
+        Row: {
+          decided_at: string
+          decided_by: string
+          decision: string
+          project_id: string
+          rationale: string
+          record_id: string
+        }
+        Insert: {
+          decided_at?: string
+          decided_by: string
+          decision: string
+          project_id: string
+          rationale: string
+          record_id: string
+        }
+        Update: {
+          decided_at?: string
+          decided_by?: string
+          decision?: string
+          project_id?: string
+          rationale?: string
+          record_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rpos_delivery_approvals_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rpos_delivery_approvals_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "rpos_executive_project_kpis"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "rpos_delivery_approvals_record_id_fkey"
+            columns: ["record_id"]
+            isOneToOne: true
+            referencedRelation: "rpos_delivery_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rpos_delivery_records: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string
+          due_date: string | null
+          id: string
+          impact: string
+          mitigation: string
+          owner_user_id: string | null
+          priority: string
+          project_id: string
+          record_type: string
+          reference: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string
+          due_date?: string | null
+          id?: string
+          impact?: string
+          mitigation?: string
+          owner_user_id?: string | null
+          priority?: string
+          project_id: string
+          record_type: string
+          reference: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string
+          due_date?: string | null
+          id?: string
+          impact?: string
+          mitigation?: string
+          owner_user_id?: string | null
+          priority?: string
+          project_id?: string
+          record_type?: string
+          reference?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rpos_delivery_records_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rpos_delivery_records_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "rpos_executive_project_kpis"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
+      rpos_delivery_schedule: {
+        Row: {
+          baseline_finish_date: string
+          created_at: string
+          created_by: string
+          depends_on: string | null
+          finish_date: string
+          id: string
+          progress_percent: number
+          project_id: string
+          start_date: string
+          status: string
+          title: string
+        }
+        Insert: {
+          baseline_finish_date: string
+          created_at?: string
+          created_by: string
+          depends_on?: string | null
+          finish_date: string
+          id?: string
+          progress_percent?: number
+          project_id: string
+          start_date: string
+          status?: string
+          title: string
+        }
+        Update: {
+          baseline_finish_date?: string
+          created_at?: string
+          created_by?: string
+          depends_on?: string | null
+          finish_date?: string
+          id?: string
+          progress_percent?: number
+          project_id?: string
+          start_date?: string
+          status?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rpos_delivery_schedule_depends_on_fkey"
+            columns: ["depends_on"]
+            isOneToOne: false
+            referencedRelation: "rpos_delivery_schedule"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rpos_delivery_schedule_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rpos_delivery_schedule_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "rpos_executive_project_kpis"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
+      rpos_knowledge_sources: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string
+          id: string
+          project_id: string
+          review_notes: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          source_type: string
+          source_uri: string
+          status: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string
+          id?: string
+          project_id: string
+          review_notes?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_type: string
+          source_uri: string
+          status?: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string
+          id?: string
+          project_id?: string
+          review_notes?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_type?: string
+          source_uri?: string
+          status?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rpos_knowledge_sources_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rpos_knowledge_sources_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "rpos_executive_project_kpis"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
+      rpos_readiness_source_links: {
+        Row: {
+          domain_id: string
+          linked_at: string
+          linked_by: string
+          project_id: string
+          source_id: string
+        }
+        Insert: {
+          domain_id: string
+          linked_at?: string
+          linked_by: string
+          project_id: string
+          source_id: string
+        }
+        Update: {
+          domain_id?: string
+          linked_at?: string
+          linked_by?: string
+          project_id?: string
+          source_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rpos_readiness_source_links_project_id_domain_id_fkey"
+            columns: ["project_id", "domain_id"]
+            isOneToOne: false
+            referencedRelation: "readiness_domain_assessments"
+            referencedColumns: ["project_id", "domain_id"]
+          },
+          {
+            foreignKeyName: "rpos_readiness_source_links_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "rpos_knowledge_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rpos_source_facts: {
+        Row: {
+          created_at: string
+          created_by: string
+          excerpt: string
+          extraction_method: string
+          fact_key: string
+          fact_value: string
+          id: string
+          project_id: string
+          review_notes: string
+          review_status: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          source_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          excerpt?: string
+          extraction_method: string
+          fact_key: string
+          fact_value: string
+          id?: string
+          project_id: string
+          review_notes?: string
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          excerpt?: string
+          extraction_method?: string
+          fact_key?: string
+          fact_value?: string
+          id?: string
+          project_id?: string
+          review_notes?: string
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rpos_source_facts_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rpos_source_facts_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "rpos_executive_project_kpis"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "rpos_source_facts_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "rpos_knowledge_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
-      [_ in never]: never
+      rpos_delivery_escalations: {
+        Row: {
+          item_id: string | null
+          item_type: string | null
+          project_id: string | null
+          reason: string | null
+          title: string | null
+        }
+        Relationships: []
+      }
+      rpos_executive_project_kpis: {
+        Row: {
+          activation_blocked: number | null
+          activation_completed: number | null
+          activation_total: number | null
+          closed_ncrs: number | null
+          critical_ncrs: number | null
+          inspections_total: number | null
+          open_actions: number | null
+          open_issues: number | null
+          open_ncrs: number | null
+          open_risks: number | null
+          pending_changes: number | null
+          portfolio_id: string | null
+          project_id: string | null
+          project_name: string | null
+          schedule_completed: number | null
+          schedule_overdue: number | null
+          schedule_total: number | null
+        }
+        Insert: {
+          activation_blocked?: never
+          activation_completed?: never
+          activation_total?: never
+          closed_ncrs?: never
+          critical_ncrs?: never
+          inspections_total?: never
+          open_actions?: never
+          open_issues?: never
+          open_ncrs?: never
+          open_risks?: never
+          pending_changes?: never
+          portfolio_id?: string | null
+          project_id?: string | null
+          project_name?: string | null
+          schedule_completed?: never
+          schedule_overdue?: never
+          schedule_total?: never
+        }
+        Update: {
+          activation_blocked?: never
+          activation_completed?: never
+          activation_total?: never
+          closed_ncrs?: never
+          critical_ncrs?: never
+          inspections_total?: never
+          open_actions?: never
+          open_issues?: never
+          open_ncrs?: never
+          open_risks?: never
+          pending_changes?: never
+          portfolio_id?: string | null
+          project_id?: string | null
+          project_name?: string | null
+          schedule_completed?: never
+          schedule_overdue?: never
+          schedule_total?: never
+        }
+        Relationships: []
+      }
+      rpos_fact_conflicts: {
+        Row: {
+          fact_a_id: string | null
+          fact_b_id: string | null
+          fact_key: string | null
+          project_id: string | null
+          source_a_id: string | null
+          source_b_id: string | null
+          value_a: string | null
+          value_b: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rpos_source_facts_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rpos_source_facts_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "rpos_executive_project_kpis"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "rpos_source_facts_source_id_fkey"
+            columns: ["source_a_id"]
+            isOneToOne: false
+            referencedRelation: "rpos_knowledge_sources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rpos_source_facts_source_id_fkey"
+            columns: ["source_b_id"]
+            isOneToOne: false
+            referencedRelation: "rpos_knowledge_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      rpos_accept_activation_milestone: {
+        Args: { p_item_id: string; p_rationale: string }
+        Returns: {
+          accepted_at: string
+          accepted_by: string
+          item_id: string
+          project_id: string
+          rationale: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "rpos_activation_acceptances"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      rpos_add_delivery_schedule: {
+        Args: {
+          p_finish: string
+          p_project_id: string
+          p_start: string
+          p_title: string
+        }
+        Returns: {
+          baseline_finish_date: string
+          created_at: string
+          created_by: string
+          depends_on: string | null
+          finish_date: string
+          id: string
+          progress_percent: number
+          project_id: string
+          start_date: string
+          status: string
+          title: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "rpos_delivery_schedule"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      rpos_agent_evidence_brief: {
+        Args: { p_agent_key: string; p_project_id: string }
+        Returns: {
+          conflict_count: number
+          excerpt: string
+          fact_id: string
+          fact_key: string
+          fact_value: string
+          source_id: string
+        }[]
+      }
+      rpos_decide_delivery_change: {
+        Args: { p_decision: string; p_rationale: string; p_record_id: string }
+        Returns: {
+          decided_at: string
+          decided_by: string
+          decision: string
+          project_id: string
+          rationale: string
+          record_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "rpos_delivery_approvals"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      rpos_decide_readiness_gate: {
+        Args: { p_decision: string; p_project_id: string; p_rationale: string }
+        Returns: {
+          decided_at: string
+          decided_by: string
+          decision: string
+          domain_snapshot: Json
+          id: number
+          project_id: string
+          rationale: string
+          snapshot_updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "readiness_gate_decisions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      rpos_link_readiness_source: {
+        Args: { p_domain_id: string; p_project_id: string; p_source_id: string }
+        Returns: {
+          domain_id: string
+          linked_at: string
+          linked_by: string
+          project_id: string
+          source_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "rpos_readiness_source_links"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      rpos_record_inspection: {
+        Args: {
+          p_date: string
+          p_discipline: string
+          p_findings: string
+          p_project_id: string
+          p_reference: string
+          p_result: string
+          p_title: string
+        }
+        Returns: {
+          created_at: string
+          discipline: string
+          findings: string
+          id: string
+          inspection_date: string
+          inspector_user_id: string
+          project_id: string
+          reference: string
+          result: string
+          title: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "rpos_assurance_inspections"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      rpos_record_ncr: {
+        Args: {
+          p_action: string
+          p_description: string
+          p_due_date: string
+          p_inspection_id: string
+          p_owner: string
+          p_reference: string
+          p_severity: string
+        }
+        Returns: {
+          corrective_action: string
+          created_at: string
+          created_by: string
+          description: string
+          due_date: string | null
+          id: string
+          inspection_id: string
+          owner_user_id: string | null
+          project_id: string
+          reference: string
+          severity: string
+          status: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "rpos_assurance_ncrs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      rpos_record_source_fact: {
+        Args: {
+          p_excerpt: string
+          p_fact_key: string
+          p_fact_value: string
+          p_method: string
+          p_source_id: string
+        }
+        Returns: {
+          created_at: string
+          created_by: string
+          excerpt: string
+          extraction_method: string
+          fact_key: string
+          fact_value: string
+          id: string
+          project_id: string
+          review_notes: string
+          review_status: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          source_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "rpos_source_facts"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      rpos_register_knowledge_source: {
+        Args: {
+          p_description?: string
+          p_project_id: string
+          p_source_type: string
+          p_source_uri: string
+          p_title: string
+        }
+        Returns: {
+          created_at: string
+          created_by: string
+          description: string
+          id: string
+          project_id: string
+          review_notes: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          source_type: string
+          source_uri: string
+          status: string
+          title: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "rpos_knowledge_sources"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       rpos_remove_org_membership: {
         Args: { p_org_id: string; p_user_id: string }
         Returns: undefined
@@ -471,6 +1714,201 @@ export type Database = {
       rpos_remove_project_membership: {
         Args: { p_project_id: string; p_user_id: string }
         Returns: undefined
+      }
+      rpos_review_ai_recommendation: {
+        Args: { p_decision: string; p_id: string; p_rationale: string }
+        Returns: {
+          agent_key: string
+          created_at: string
+          created_by: string
+          generated_at: string | null
+          generation_method: string
+          id: string
+          model_name: string | null
+          project_id: string
+          recommendation: string
+          review_rationale: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          source_references: string
+          status: string
+          title: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "rpos_ai_recommendations"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      rpos_review_knowledge_source: {
+        Args: { p_notes: string; p_source_id: string; p_status: string }
+        Returns: {
+          created_at: string
+          created_by: string
+          description: string
+          id: string
+          project_id: string
+          review_notes: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          source_type: string
+          source_uri: string
+          status: string
+          title: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "rpos_knowledge_sources"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      rpos_review_source_fact: {
+        Args: { p_fact_id: string; p_notes: string; p_status: string }
+        Returns: {
+          created_at: string
+          created_by: string
+          excerpt: string
+          extraction_method: string
+          fact_key: string
+          fact_value: string
+          id: string
+          project_id: string
+          review_notes: string
+          review_status: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          source_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "rpos_source_facts"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      rpos_save_activation_item: {
+        Args: {
+          p_day: number
+          p_dependency?: string
+          p_item_id?: string
+          p_notes?: string
+          p_owner?: string
+          p_project_id: string
+          p_status?: string
+          p_title: string
+          p_type: string
+          p_workstream: string
+        }
+        Returns: {
+          created_at: string
+          created_by: string
+          day_number: number
+          depends_on: string | null
+          id: string
+          item_type: string
+          notes: string
+          owner_user_id: string | null
+          project_id: string
+          status: string
+          title: string
+          updated_at: string
+          workstream: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "rpos_activation_items"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      rpos_save_delivery_record: {
+        Args: {
+          p_description: string
+          p_due_date: string
+          p_impact: string
+          p_mitigation: string
+          p_owner: string
+          p_priority: string
+          p_project_id: string
+          p_record_id?: string
+          p_reference: string
+          p_status?: string
+          p_title: string
+          p_type: string
+        }
+        Returns: {
+          created_at: string
+          created_by: string
+          description: string
+          due_date: string | null
+          id: string
+          impact: string
+          mitigation: string
+          owner_user_id: string | null
+          priority: string
+          project_id: string
+          record_type: string
+          reference: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "rpos_delivery_records"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      rpos_save_readiness_domain: {
+        Args: {
+          p_domain_id: string
+          p_evidence_notes: string
+          p_evidence_verified: boolean
+          p_hard_stop: boolean
+          p_project_id: string
+          p_score: number
+        }
+        Returns: {
+          domain_id: string
+          evidence_notes: string
+          evidence_verified: boolean
+          hard_stop: boolean
+          project_id: string
+          score: number | null
+          updated_at: string
+          updated_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "readiness_domain_assessments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      rpos_set_org_ai_agent: {
+        Args: {
+          p_agent_key: string
+          p_enabled: boolean
+          p_org_id: string
+          p_reason: string
+        }
+        Returns: {
+          agent_key: string
+          enabled: boolean
+          organisation_id: string
+          reason: string
+          updated_at: string
+          updated_by: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "rpos_ai_agent_settings"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       rpos_set_org_membership: {
         Args: { p_org_id: string; p_role: string; p_user_id: string }
@@ -498,6 +1936,130 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "project_memberships"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      rpos_submit_ai_recommendation: {
+        Args: {
+          p_agent_key: string
+          p_project_id: string
+          p_recommendation: string
+          p_sources: string
+          p_title: string
+        }
+        Returns: {
+          agent_key: string
+          created_at: string
+          created_by: string
+          generated_at: string | null
+          generation_method: string
+          id: string
+          model_name: string | null
+          project_id: string
+          recommendation: string
+          review_rationale: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          source_references: string
+          status: string
+          title: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "rpos_ai_recommendations"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      rpos_submit_generated_recommendation: {
+        Args: {
+          p_agent_key: string
+          p_model: string
+          p_project_id: string
+          p_recommendation: string
+          p_sources: string
+          p_title: string
+        }
+        Returns: {
+          agent_key: string
+          created_at: string
+          created_by: string
+          generated_at: string | null
+          generation_method: string
+          id: string
+          model_name: string | null
+          project_id: string
+          recommendation: string
+          review_rationale: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          source_references: string
+          status: string
+          title: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "rpos_ai_recommendations"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      rpos_update_delivery_schedule: {
+        Args: {
+          p_dependency?: string
+          p_finish: string
+          p_id: string
+          p_progress: number
+          p_start: string
+          p_status: string
+          p_title: string
+        }
+        Returns: {
+          baseline_finish_date: string
+          created_at: string
+          created_by: string
+          depends_on: string | null
+          finish_date: string
+          id: string
+          progress_percent: number
+          project_id: string
+          start_date: string
+          status: string
+          title: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "rpos_delivery_schedule"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      rpos_update_ncr_action: {
+        Args: {
+          p_action: string
+          p_due_date: string
+          p_ncr_id: string
+          p_status: string
+        }
+        Returns: {
+          corrective_action: string
+          created_at: string
+          created_by: string
+          description: string
+          due_date: string | null
+          id: string
+          inspection_id: string
+          owner_user_id: string | null
+          project_id: string
+          reference: string
+          severity: string
+          status: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "rpos_assurance_ncrs"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -574,6 +2136,22 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "projects"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      rpos_verify_ncr: {
+        Args: { p_ncr_id: string; p_notes: string }
+        Returns: {
+          ncr_id: string
+          project_id: string
+          verification_notes: string
+          verified_at: string
+          verified_by: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "rpos_assurance_verifications"
           isOneToOne: true
           isSetofReturn: false
         }
