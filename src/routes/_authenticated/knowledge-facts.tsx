@@ -49,6 +49,8 @@ function FactsPage(){
  const [reviewNotes,setReviewNotes]=useState("");
  const [saving,setSaving]=useState(false);
  const [extracting,setExtracting]=useState(false);
+ const [aiDrafts,setAiDrafts]=useState<{key:string;value:string;excerpt:string;page:string;selected:boolean}[]>([]);
+ const [draftSource,setDraftSource]=useState("");
  const data=query.data;
  const selected=projectId||data?.projects[0]?.id||"";
  const sources=data?.sources.filter(s=>s.project_id===selected)??[];
@@ -84,10 +86,29 @@ function FactsPage(){
    const result=await extractPdfCandidates({data:{source_id:activeSource},headers:{Authorization:"Bearer "+session.session.access_token}});
    if(result.source_id!==activeSource)throw new Error("Source changed during extraction.");
    if(!result.candidates.length){toast.info("No supported factual candidates found.");return;}
-   const rows=result.candidates.map(c=>c.key+": "+c.value);
-   setBatch(rows.join("\n"));setImportName("AI draft from "+selectedSource.title);
-   toast.info("AI suggestions require checking against the original PDF and independent review. Page and excerpt references are not yet saved with bulk candidates.");
+   setAiDrafts(result.candidates.map(c=>({...c,selected:true})));
+   setDraftSource(activeSource);
+   toast.info("Check each AI candidate and its source excerpt before saving. Independent review is still required.");
   }catch(e){toast.error(mapRpcError(e));}finally{setExtracting(false);}
+ }
+ async function saveAiDrafts(){
+  if(draftSource!==activeSource){toast.error("The evidence source changed. Re-run extraction.");return;}
+  const chosen=aiDrafts.filter(c=>c.selected);
+  if(!chosen.length){toast.error("Select at least one candidate.");return;}
+  setSaving(true);
+  let count=0;
+  try{
+   for(const c of chosen){
+    const provenance=(c.page?"Page "+c.page+": ":"")+c.excerpt;
+    await saveFact(c.key,c.value,"text_pattern",provenance.slice(0,4000));
+    count++;
+   }
+   setAiDrafts([]);setDraftSource("");await refresh();
+   toast.success(count+" AI candidates staged for independent review");
+  }catch(e){
+   setAiDrafts(old=>old.map((c,i)=>i<count?{...c,selected:false}:c));
+   toast.error("Saved "+count+" candidates before an error: "+mapRpcError(e));
+  }finally{setSaving(false);}
  }
  async function submit(){
   if(!activeSource){toast.error("Select a source first.");return;}
@@ -133,6 +154,7 @@ function FactsPage(){
     {selectedSource&&<div className="rounded border p-3 text-sm"><strong>Selected evidence:</strong> {selectedSource.title} · Source review: <strong>{selectedSource.status.replaceAll("_"," ")}</strong><p className="mt-1 break-all text-xs text-muted-foreground">{selectedSource.source_uri}</p><p className="mt-1 text-xs text-muted-foreground">Fact acceptance is independent of source verification. Both must be checked before relying on evidence.</p></div>}
     {canWrite&&<section className="space-y-2 rounded-lg border p-4">
      <h2 className="font-semibold">Stage facts for review</h2>
+     {aiDrafts.length>0&&<div className="space-y-3 rounded border p-3"><h3 className="font-semibold">AI-extracted candidates · verify before saving</h3><p className="text-xs text-muted-foreground">Page labels and excerpts are AI-proposed, not independently confirmed. Compare each with the original PDF.</p>{aiDrafts.map((c,i)=><div key={i} className="space-y-1 rounded border p-2 text-sm"><label className="flex items-start gap-2"><input type="checkbox" checked={c.selected} onChange={e=>setAiDrafts(old=>old.map((x,j)=>j===i?{...x,selected:e.target.checked}:x))}/><span><strong>{c.key}:</strong> {c.value}</span></label><p className="text-xs text-muted-foreground">{c.page?"Page "+c.page+" · ":""}{c.excerpt}</p></div>)}<Button disabled={saving||extracting||draftSource!==activeSource} onClick={saveAiDrafts}>Save selected AI candidates for review</Button></div>}
      {selectedSource?.source_uri.toLowerCase().endsWith(".pdf")&&<Button variant="outline" disabled={extracting||saving} onClick={extractPdf}>{extracting?"Extracting PDF…":"Suggest facts from registered PDF (AI)"}</Button>}
      <Input aria-label="Fact key" placeholder="Fact name (e.g. Grid connection capacity)" value={key} onChange={e=>setKey(e.target.value)}/>
      <Input aria-label="Fact value" placeholder="Fact value" value={value} onChange={e=>setValue(e.target.value)}/>
