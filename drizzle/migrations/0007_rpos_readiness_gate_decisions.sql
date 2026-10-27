@@ -40,6 +40,8 @@ DECLARE
   snapshot jsonb;
   latest timestamptz;
   latest_count bigint;
+  weighted_score numeric;
+  minimum_score numeric;
   item public.readiness_gate_decisions;
 BEGIN
   IF uid IS NULL THEN RAISE EXCEPTION 'Not authenticated' USING ERRCODE = '42501'; END IF;
@@ -65,6 +67,20 @@ BEGIN
     WHERE d.project_id = p_project_id AND (d.score IS NULL OR NOT d.evidence_verified OR d.hard_stop))
     AND p_decision <> 'rejected' THEN
     RAISE EXCEPTION 'Approval blocked: unscored domains, unverified evidence or hard stops' USING ERRCODE = '22023';
+  END IF;
+  -- Mirror the canonical 14-domain weights in the database, not the untrusted browser.
+  SELECT round(sum(d.score * CASE d.domain_id
+    WHEN 'D01' THEN 6 WHEN 'D02' THEN 8 WHEN 'D03' THEN 7 WHEN 'D04' THEN 10
+    WHEN 'D05' THEN 9 WHEN 'D06' THEN 8 WHEN 'D07' THEN 9 WHEN 'D08' THEN 9
+    WHEN 'D09' THEN 6 WHEN 'D10' THEN 6 WHEN 'D11' THEN 6 WHEN 'D12' THEN 5
+    WHEN 'D13' THEN 6 WHEN 'D14' THEN 5 ELSE 0 END / 5.0), 1), min(d.score)
+    INTO weighted_score, minimum_score
+    FROM public.readiness_domain_assessments d WHERE d.project_id = p_project_id;
+  IF p_decision = 'approved' AND (weighted_score < 75 OR minimum_score < 2) THEN
+    RAISE EXCEPTION 'Full approval requires 75 percent and no domain below 2' USING ERRCODE = '22023';
+  END IF;
+  IF p_decision = 'conditionally_approved' AND (weighted_score < 55 OR minimum_score < 1) THEN
+    RAISE EXCEPTION 'Conditional approval requires 55 percent and no domain below 1' USING ERRCODE = '22023';
   END IF;
   INSERT INTO public.readiness_gate_decisions(project_id, decision, rationale, decided_by, domain_snapshot, snapshot_updated_at)
     VALUES (p_project_id, p_decision, btrim(p_rationale), uid, snapshot, latest)
