@@ -36,10 +36,10 @@ describe("readiness recommendations", () => {
   it("returns incomplete for missing, invalid or duplicate domains", () => {
     expect(evaluateReadiness(base().slice(1)).result).toBe("INCOMPLETE");
     const invalid = base();
-    invalid[0].score = 6;
+    invalid[0]!.score = 6;
     expect(evaluateReadiness(invalid).result).toBe("INCOMPLETE");
     const duplicates = base();
-    duplicates[0].id = duplicates[1].id;
+    duplicates[0]!.id = duplicates[1]!.id;
     expect(evaluateReadiness(duplicates).result).toBe("INCOMPLETE");
   });
   it("rejects unrecognised domain identifiers", () => {
