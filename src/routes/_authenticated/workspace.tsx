@@ -80,11 +80,21 @@ function Workspace() {
         {q.isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
         {q.error && <p role="alert" className="text-sm text-destructive">Could not load your workspace. Please try again.</p>}
         {d && membershipState(d.orgRoles.length, d.projectMemberships) === "no-membership" && (
-          <div className="rounded-lg border bg-card p-6">
-            <h1 className="font-display text-lg font-semibold">No organisation membership</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Your account is signed in but has not been added to any organisation or project. Send your user ID below to your organisation administrator so they can add you.</p>
+          <div className="max-w-2xl rounded-lg border bg-card p-6">
+            <h1 className="font-display text-lg font-semibold">No organisation membership yet</h1>
+            <p className="mt-1 text-sm text-muted-foreground">You are signed in as <b className="text-foreground">{user.email}</b>, but your account has not been added to any organisation or project, so there are no records to show.</p>
             <UserIdBadge id={user.id} />
-            <Link to="/" className="mt-3 inline-block text-xs text-primary hover:underline">Explore the demo meanwhile</Link>
+            <h2 className="mt-5 text-sm font-semibold">How to get access</h2>
+            <ol className="mt-2 list-decimal space-y-1.5 pl-5 text-sm text-muted-foreground">
+              <li>Copy your user ID above.</li>
+              <li>Send it, with your email address, to an <b className="text-foreground">admin of your organisation's RPOS workspace</b> — usually your project director or RPOS lead.</li>
+              <li>Tell them which organisation (and, if relevant, which projects) you need, and the role you expect: viewer, member, manager, director or admin.</li>
+              <li>Once they add you, refresh this page.</li>
+            </ol>
+            <p className="mt-4 rounded-md bg-muted/60 p-3 text-xs text-muted-foreground">
+              Access can only be granted by an existing admin of that organisation. You cannot add yourself, and RPOS support cannot see your organisation's data. If your organisation has no RPOS admin yet, your organisation's appointed RPOS operator must set up the first admin.
+            </p>
+            <Link to="/" className="mt-3 inline-block text-xs text-primary hover:underline">Explore the demo (fictional data) meanwhile</Link>
           </div>
         )}
         {d && membershipState(d.orgRoles.length, d.projectMemberships) === "has-access" && (
