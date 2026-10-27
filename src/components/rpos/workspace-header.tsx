@@ -1,7 +1,8 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Copy, LogOut } from "lucide-react";
+import { Copy, LogOut, Menu } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
@@ -24,17 +25,19 @@ const LINKS = [
 ] as const;
 
 export function WorkspaceHeader({ email, onSignOut }: { email?: string | undefined; onSignOut: () => void }) {
+  const [menuOpen, setMenuOpen] = useState(false);
   return (
-    <header className="flex h-14 items-center gap-3 border-b bg-card px-5">
+    <header className="flex min-h-14 flex-wrap items-center gap-3 border-b bg-card px-5 py-2">
       <span className="grid size-8 place-items-center rounded-md bg-primary font-display text-sm font-bold text-primary-foreground">R</span>
       <span className="font-display text-sm font-bold">RPOS Workspace</span>
       <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-semibold uppercase text-muted-foreground">Live data</span>
-      <nav aria-label="Workspace" className="ml-4 flex gap-1">
+      <Button size="sm" variant="outline" className="ml-auto xl:hidden" aria-label="Toggle navigation" aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}><Menu className="size-4" /></Button>
+      <nav aria-label="Workspace" className={`${menuOpen ? "flex" : "hidden"} order-last w-full flex-wrap gap-1 xl:order-none xl:ml-4 xl:flex xl:w-auto`}>
         {LINKS.map((l) => (
-          <Link key={l.to} to={l.to} className="rounded-md px-2.5 py-1 text-xs font-medium text-muted-foreground hover:bg-muted" activeProps={{ className: "bg-muted text-foreground" }}>{l.label}</Link>
+          <Link key={l.to} to={l.to} onClick={() => setMenuOpen(false)} className="rounded-md px-2.5 py-1 text-xs font-medium text-muted-foreground hover:bg-muted" activeProps={{ className: "bg-muted text-foreground" }}>{l.label}</Link>
         ))}
       </nav>
-      <span className="ml-auto text-xs text-muted-foreground">{email}</span>
+      <span className="hidden max-w-40 truncate text-xs text-muted-foreground lg:inline" title={email}>{email}</span>
       <Button size="sm" variant="outline" onClick={onSignOut}><LogOut className="size-4" /> Sign out</Button>
     </header>
   );
