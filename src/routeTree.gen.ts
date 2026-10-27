@@ -10,33 +10,232 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ActivationRouteImport } from './routes/activation'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AgentsRouteImport } from './routes/agents'
+import { Route as AssuranceRouteImport } from './routes/assurance'
+import { Route as DeliveryRouteImport } from './routes/delivery'
+import { Route as IntelligenceRouteImport } from './routes/intelligence'
+import { Route as KnowledgeRouteImport } from './routes/knowledge'
+import { Route as ReadinessRouteImport } from './routes/readiness'
+import { Route as ReportsRouteImport } from './routes/reports'
+import { Route as RkiRouteImport } from './routes/rki'
+import { Route as PortfoliosIndexRouteImport } from './routes/portfolios.index'
+import { Route as PortfoliosIdRouteImport } from './routes/portfolios.$id'
+import { Route as ProjectsIndexRouteImport } from './routes/projects.index'
+import { Route as ProjectsIdRouteImport } from './routes/projects.$id'
+import { Route as RecordsIdRouteImport } from './routes/records.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ActivationRoute = ActivationRouteImport.update({
+  id: '/activation',
+  path: '/activation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AgentsRoute = AgentsRouteImport.update({
+  id: '/agents',
+  path: '/agents',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AssuranceRoute = AssuranceRouteImport.update({
+  id: '/assurance',
+  path: '/assurance',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DeliveryRoute = DeliveryRouteImport.update({
+  id: '/delivery',
+  path: '/delivery',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IntelligenceRoute = IntelligenceRouteImport.update({
+  id: '/intelligence',
+  path: '/intelligence',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KnowledgeRoute = KnowledgeRouteImport.update({
+  id: '/knowledge',
+  path: '/knowledge',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReadinessRoute = ReadinessRouteImport.update({
+  id: '/readiness',
+  path: '/readiness',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportsRoute = ReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RkiRoute = RkiRouteImport.update({
+  id: '/rki',
+  path: '/rki',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PortfoliosIndexRoute = PortfoliosIndexRouteImport.update({
+  id: '/portfolios/',
+  path: '/portfolios/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PortfoliosIdRoute = PortfoliosIdRouteImport.update({
+  id: '/portfolios/$id',
+  path: '/portfolios/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProjectsIndexRoute = ProjectsIndexRouteImport.update({
+  id: '/projects/',
+  path: '/projects/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProjectsIdRoute = ProjectsIdRouteImport.update({
+  id: '/projects/$id',
+  path: '/projects/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecordsIdRoute = RecordsIdRouteImport.update({
+  id: '/records/$id',
+  path: '/records/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/activation': typeof ActivationRoute
+  '/admin': typeof AdminRoute
+  '/agents': typeof AgentsRoute
+  '/assurance': typeof AssuranceRoute
+  '/delivery': typeof DeliveryRoute
+  '/intelligence': typeof IntelligenceRoute
+  '/knowledge': typeof KnowledgeRoute
+  '/readiness': typeof ReadinessRoute
+  '/reports': typeof ReportsRoute
+  '/rki': typeof RkiRoute
+  '/portfolios/$id': typeof PortfoliosIdRoute
+  '/projects/$id': typeof ProjectsIdRoute
+  '/records/$id': typeof RecordsIdRoute
+  '/portfolios/': typeof PortfoliosIndexRoute
+  '/projects/': typeof ProjectsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/activation': typeof ActivationRoute
+  '/admin': typeof AdminRoute
+  '/agents': typeof AgentsRoute
+  '/assurance': typeof AssuranceRoute
+  '/delivery': typeof DeliveryRoute
+  '/intelligence': typeof IntelligenceRoute
+  '/knowledge': typeof KnowledgeRoute
+  '/readiness': typeof ReadinessRoute
+  '/reports': typeof ReportsRoute
+  '/rki': typeof RkiRoute
+  '/portfolios/$id': typeof PortfoliosIdRoute
+  '/projects/$id': typeof ProjectsIdRoute
+  '/records/$id': typeof RecordsIdRoute
+  '/portfolios': typeof PortfoliosIndexRoute
+  '/projects': typeof ProjectsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/activation': typeof ActivationRoute
+  '/admin': typeof AdminRoute
+  '/agents': typeof AgentsRoute
+  '/assurance': typeof AssuranceRoute
+  '/delivery': typeof DeliveryRoute
+  '/intelligence': typeof IntelligenceRoute
+  '/knowledge': typeof KnowledgeRoute
+  '/readiness': typeof ReadinessRoute
+  '/reports': typeof ReportsRoute
+  '/rki': typeof RkiRoute
+  '/portfolios/$id': typeof PortfoliosIdRoute
+  '/projects/$id': typeof ProjectsIdRoute
+  '/records/$id': typeof RecordsIdRoute
+  '/portfolios/': typeof PortfoliosIndexRoute
+  '/projects/': typeof ProjectsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/activation'
+    | '/admin'
+    | '/agents'
+    | '/assurance'
+    | '/delivery'
+    | '/intelligence'
+    | '/knowledge'
+    | '/readiness'
+    | '/reports'
+    | '/rki'
+    | '/portfolios/$id'
+    | '/projects/$id'
+    | '/records/$id'
+    | '/portfolios/'
+    | '/projects/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/activation'
+    | '/admin'
+    | '/agents'
+    | '/assurance'
+    | '/delivery'
+    | '/intelligence'
+    | '/knowledge'
+    | '/readiness'
+    | '/reports'
+    | '/rki'
+    | '/portfolios/$id'
+    | '/projects/$id'
+    | '/records/$id'
+    | '/portfolios'
+    | '/projects'
+  id:
+    | '__root__'
+    | '/'
+    | '/activation'
+    | '/admin'
+    | '/agents'
+    | '/assurance'
+    | '/delivery'
+    | '/intelligence'
+    | '/knowledge'
+    | '/readiness'
+    | '/reports'
+    | '/rki'
+    | '/portfolios/$id'
+    | '/projects/$id'
+    | '/records/$id'
+    | '/portfolios/'
+    | '/projects/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ActivationRoute: typeof ActivationRoute
+  AdminRoute: typeof AdminRoute
+  AgentsRoute: typeof AgentsRoute
+  AssuranceRoute: typeof AssuranceRoute
+  DeliveryRoute: typeof DeliveryRoute
+  IntelligenceRoute: typeof IntelligenceRoute
+  KnowledgeRoute: typeof KnowledgeRoute
+  ReadinessRoute: typeof ReadinessRoute
+  ReportsRoute: typeof ReportsRoute
+  RkiRoute: typeof RkiRoute
+  PortfoliosIdRoute: typeof PortfoliosIdRoute
+  ProjectsIdRoute: typeof ProjectsIdRoute
+  RecordsIdRoute: typeof RecordsIdRoute
+  PortfoliosIndexRoute: typeof PortfoliosIndexRoute
+  ProjectsIndexRoute: typeof ProjectsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +247,131 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/activation': {
+      id: '/activation'
+      path: '/activation'
+      fullPath: '/activation'
+      preLoaderRoute: typeof ActivationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/agents': {
+      id: '/agents'
+      path: '/agents'
+      fullPath: '/agents'
+      preLoaderRoute: typeof AgentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/assurance': {
+      id: '/assurance'
+      path: '/assurance'
+      fullPath: '/assurance'
+      preLoaderRoute: typeof AssuranceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/delivery': {
+      id: '/delivery'
+      path: '/delivery'
+      fullPath: '/delivery'
+      preLoaderRoute: typeof DeliveryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/intelligence': {
+      id: '/intelligence'
+      path: '/intelligence'
+      fullPath: '/intelligence'
+      preLoaderRoute: typeof IntelligenceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/knowledge': {
+      id: '/knowledge'
+      path: '/knowledge'
+      fullPath: '/knowledge'
+      preLoaderRoute: typeof KnowledgeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/readiness': {
+      id: '/readiness'
+      path: '/readiness'
+      fullPath: '/readiness'
+      preLoaderRoute: typeof ReadinessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports': {
+      id: '/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof ReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rki': {
+      id: '/rki'
+      path: '/rki'
+      fullPath: '/rki'
+      preLoaderRoute: typeof RkiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/portfolios/': {
+      id: '/portfolios/'
+      path: '/portfolios'
+      fullPath: '/portfolios/'
+      preLoaderRoute: typeof PortfoliosIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/portfolios/$id': {
+      id: '/portfolios/$id'
+      path: '/portfolios/$id'
+      fullPath: '/portfolios/$id'
+      preLoaderRoute: typeof PortfoliosIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/projects/': {
+      id: '/projects/'
+      path: '/projects'
+      fullPath: '/projects/'
+      preLoaderRoute: typeof ProjectsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/projects/$id': {
+      id: '/projects/$id'
+      path: '/projects/$id'
+      fullPath: '/projects/$id'
+      preLoaderRoute: typeof ProjectsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/records/$id': {
+      id: '/records/$id'
+      path: '/records/$id'
+      fullPath: '/records/$id'
+      preLoaderRoute: typeof RecordsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ActivationRoute: ActivationRoute,
+  AdminRoute: AdminRoute,
+  AgentsRoute: AgentsRoute,
+  AssuranceRoute: AssuranceRoute,
+  DeliveryRoute: DeliveryRoute,
+  IntelligenceRoute: IntelligenceRoute,
+  KnowledgeRoute: KnowledgeRoute,
+  ReadinessRoute: ReadinessRoute,
+  ReportsRoute: ReportsRoute,
+  RkiRoute: RkiRoute,
+  PortfoliosIdRoute: PortfoliosIdRoute,
+  ProjectsIdRoute: ProjectsIdRoute,
+  RecordsIdRoute: RecordsIdRoute,
+  PortfoliosIndexRoute: PortfoliosIndexRoute,
+  ProjectsIndexRoute: ProjectsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
