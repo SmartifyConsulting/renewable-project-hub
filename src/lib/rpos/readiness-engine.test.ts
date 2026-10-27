@@ -36,6 +36,11 @@ describe("readiness recommendations", () => {
     duplicates[0].id = duplicates[1].id;
     expect(evaluateReadiness(duplicates).result).toBe("INCOMPLETE");
   });
+  it("rejects unrecognised domain identifiers", () => {
+    const domains = base();
+    domains[0].id = "D99";
+    expect(evaluateReadiness(domains).result).toBe("INCOMPLETE");
+  });
   it("does not approve a gate automatically", () => {
     expect(evaluateReadiness(base()).requiresHumanApproval).toBe(true);
   });
