@@ -57,6 +57,11 @@ describe("readiness recommendations", () => {
     domains[0].score = null;
     expect(evaluateReadiness(domains)).toMatchObject({ result: "INCOMPLETE", overall: null });
   });
+  it("rejects scores outside the database half-point increments", () => {
+    const domains = base();
+    domains[0].score = 3.7;
+    expect(evaluateReadiness(domains)).toMatchObject({ result: "INCOMPLETE", overall: null });
+  });
   it("does not approve a gate automatically", () => {
     expect(evaluateReadiness(base()).requiresHumanApproval).toBe(true);
   });
