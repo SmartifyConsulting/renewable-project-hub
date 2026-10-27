@@ -34,6 +34,7 @@ export const extractPdfCandidates = createServerFn({ method: "POST" })
   const { data: file, error: downloadError } = await db.storage.from("rpos-knowledge").download(objectPath);
   if (downloadError || !file) throw new Error("Document unavailable or access denied");
   if (file.size > 8 * 1024 * 1024) throw new Error("AI PDF extraction supports documents up to 8 MiB");
+  if (file.size < 5) throw new Error("Empty or invalid PDF");
   const bytes = Buffer.from(await file.arrayBuffer());
   if (bytes.subarray(0,5).toString("ascii") !== "%PDF-") throw new Error("Invalid PDF content");
   const apiKey = process.env["OPENAI_API_KEY"];
@@ -57,9 +58,11 @@ export const extractPdfCandidates = createServerFn({ method: "POST" })
    if (!response.ok) throw new Error(`OpenAI PDF extraction failed (${response.status})`);
    const result = await response.json() as { output?: Array<{content?:Array<{type?:string;text?:string}>}> };
    const output = result.output?.flatMap(x=>x.content??[]).find(x=>x.type==="output_text")?.text ?? "";
+   if (output.length > 120000) throw new Error("AI extraction response exceeded the allowed size");
    const parsed = JSON.parse(output) as {candidates?:unknown};
    if (!Array.isArray(parsed.candidates)) throw new Error("Invalid extraction response");
    const candidates:Candidate[] = [];
+   const seen = new Set<string>();
    for (const item of parsed.candidates.slice(0,30)) {
     if (!item || typeof item!=="object") continue;
     const row=item as Record<string,unknown>;
@@ -68,6 +71,9 @@ export const extractPdfCandidates = createServerFn({ method: "POST" })
     const excerpt=typeof row.excerpt==="string"?row.excerpt.trim():"";
     const page=typeof row.page==="string"?row.page.trim():"";
     if (key.length<2||key.length>120||!value||value.length>4000||!excerpt||excerpt.length>3500) continue;
+    const signature=key.toLowerCase()+"\\u0000"+value.toLowerCase();
+    if(seen.has(signature))continue;
+    seen.add(signature);
     candidates.push({key,value,excerpt,page:page.slice(0,40)});
    }
    return {candidates,source_id:data.source_id};
