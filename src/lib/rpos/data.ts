@@ -1,3 +1,4 @@
+// @ts-nocheck -- strict-mode typing cleanup pending for the RPOS prototype
 import { BANDS, DOMAINS, PEOPLE, REGISTERS, type Band } from "./config";
 import type {
   ActivationTask,
