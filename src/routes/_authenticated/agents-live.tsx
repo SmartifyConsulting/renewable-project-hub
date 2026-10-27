@@ -8,7 +8,7 @@ import {Textarea} from "@/components/ui/textarea";
 import {supabase} from "@/integrations/supabase/client";
 import {WorkspaceHeader,useSignOut} from "@/components/rpos/workspace-header";
 import {canWriteOrg,mapRpcError} from "@/lib/rpos/auth-config";
-export const Route=createFileRoute("/_authenticated/agents")({component:AgentsPage});
+export const Route=createFileRoute("/_authenticated/agents-live")({component:AgentsPage});
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db=supabase as any;
 type Agent={agent_key:string;name:string;domain:string;purpose:string;enabled:boolean};

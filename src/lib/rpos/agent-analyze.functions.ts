@@ -13,9 +13,9 @@ export const analyzeWithOpenAI = createServerFn({ method: "POST" })
     return { project_id: project, agent_key: agent };
   })
   .handler(async ({ data, context }) => {
-    const apiKey = process.env.OPENAI_API_KEY;
+    const apiKey = process.env['OPENAI_API_KEY'];
     if (!apiKey) throw new Error("OpenAI key is not configured");
-    const model = process.env.OPENAI_MODEL ?? "gpt-4.1-mini";
+    const model = process.env['OPENAI_MODEL'] ?? "gpt-4.1-mini";
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const db = context.supabase as any;
     const { data: facts, error: briefError } = await db.rpc("rpos_agent_evidence_brief", { p_project_id: data.project_id, p_agent_key: data.agent_key });

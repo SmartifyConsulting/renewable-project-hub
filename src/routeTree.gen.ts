@@ -24,8 +24,18 @@ import { Route as ReadinessRouteImport } from './routes/readiness'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RkiRouteImport } from './routes/rki'
+import { Route as AuthenticatedActivationLiveRouteImport } from './routes/_authenticated/activation-live'
+import { Route as AuthenticatedAgentEvidenceRouteImport } from './routes/_authenticated/agent-evidence'
+import { Route as AuthenticatedAgentsLiveRouteImport } from './routes/_authenticated/agents-live'
+import { Route as AuthenticatedAssuranceLiveRouteImport } from './routes/_authenticated/assurance-live'
 import { Route as AuthenticatedAuditRouteImport } from './routes/_authenticated/audit'
+import { Route as AuthenticatedDeliveryLiveRouteImport } from './routes/_authenticated/delivery-live'
+import { Route as AuthenticatedExecutiveRouteImport } from './routes/_authenticated/executive'
+import { Route as AuthenticatedKnowledgeFactsRouteImport } from './routes/_authenticated/knowledge-facts'
+import { Route as AuthenticatedKnowledgeLiveRouteImport } from './routes/_authenticated/knowledge-live'
 import { Route as AuthenticatedMembersRouteImport } from './routes/_authenticated/members'
+import { Route as AuthenticatedReadinessLiveRouteImport } from './routes/_authenticated/readiness-live'
+import { Route as AuthenticatedScheduleRouteImport } from './routes/_authenticated/schedule'
 import { Route as AuthenticatedWorkspaceRouteImport } from './routes/_authenticated/workspace'
 import { Route as PortfoliosIndexRouteImport } from './routes/portfolios.index'
 import { Route as PortfoliosIdRouteImport } from './routes/portfolios.$id'
@@ -107,14 +117,71 @@ const RkiRoute = RkiRouteImport.update({
   path: '/rki',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedActivationLiveRoute =
+  AuthenticatedActivationLiveRouteImport.update({
+    id: '/activation-live',
+    path: '/activation-live',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAgentEvidenceRoute =
+  AuthenticatedAgentEvidenceRouteImport.update({
+    id: '/agent-evidence',
+    path: '/agent-evidence',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAgentsLiveRoute = AuthenticatedAgentsLiveRouteImport.update({
+  id: '/agents-live',
+  path: '/agents-live',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAssuranceLiveRoute =
+  AuthenticatedAssuranceLiveRouteImport.update({
+    id: '/assurance-live',
+    path: '/assurance-live',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAuditRoute = AuthenticatedAuditRouteImport.update({
   id: '/audit',
   path: '/audit',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedDeliveryLiveRoute =
+  AuthenticatedDeliveryLiveRouteImport.update({
+    id: '/delivery-live',
+    path: '/delivery-live',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedExecutiveRoute = AuthenticatedExecutiveRouteImport.update({
+  id: '/executive',
+  path: '/executive',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedKnowledgeFactsRoute =
+  AuthenticatedKnowledgeFactsRouteImport.update({
+    id: '/knowledge-facts',
+    path: '/knowledge-facts',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedKnowledgeLiveRoute =
+  AuthenticatedKnowledgeLiveRouteImport.update({
+    id: '/knowledge-live',
+    path: '/knowledge-live',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedMembersRoute = AuthenticatedMembersRouteImport.update({
   id: '/members',
   path: '/members',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedReadinessLiveRoute =
+  AuthenticatedReadinessLiveRouteImport.update({
+    id: '/readiness-live',
+    path: '/readiness-live',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedScheduleRoute = AuthenticatedScheduleRouteImport.update({
+  id: '/schedule',
+  path: '/schedule',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedWorkspaceRoute = AuthenticatedWorkspaceRouteImport.update({
@@ -163,8 +230,18 @@ export interface FileRoutesByFullPath {
   '/reports': typeof ReportsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/rki': typeof RkiRoute
+  '/activation-live': typeof AuthenticatedActivationLiveRoute
+  '/agent-evidence': typeof AuthenticatedAgentEvidenceRoute
+  '/agents-live': typeof AuthenticatedAgentsLiveRoute
+  '/assurance-live': typeof AuthenticatedAssuranceLiveRoute
   '/audit': typeof AuthenticatedAuditRoute
+  '/delivery-live': typeof AuthenticatedDeliveryLiveRoute
+  '/executive': typeof AuthenticatedExecutiveRoute
+  '/knowledge-facts': typeof AuthenticatedKnowledgeFactsRoute
+  '/knowledge-live': typeof AuthenticatedKnowledgeLiveRoute
   '/members': typeof AuthenticatedMembersRoute
+  '/readiness-live': typeof AuthenticatedReadinessLiveRoute
+  '/schedule': typeof AuthenticatedScheduleRoute
   '/workspace': typeof AuthenticatedWorkspaceRoute
   '/portfolios/$id': typeof PortfoliosIdRoute
   '/projects/$id': typeof ProjectsIdRoute
@@ -187,8 +264,18 @@ export interface FileRoutesByTo {
   '/reports': typeof ReportsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/rki': typeof RkiRoute
+  '/activation-live': typeof AuthenticatedActivationLiveRoute
+  '/agent-evidence': typeof AuthenticatedAgentEvidenceRoute
+  '/agents-live': typeof AuthenticatedAgentsLiveRoute
+  '/assurance-live': typeof AuthenticatedAssuranceLiveRoute
   '/audit': typeof AuthenticatedAuditRoute
+  '/delivery-live': typeof AuthenticatedDeliveryLiveRoute
+  '/executive': typeof AuthenticatedExecutiveRoute
+  '/knowledge-facts': typeof AuthenticatedKnowledgeFactsRoute
+  '/knowledge-live': typeof AuthenticatedKnowledgeLiveRoute
   '/members': typeof AuthenticatedMembersRoute
+  '/readiness-live': typeof AuthenticatedReadinessLiveRoute
+  '/schedule': typeof AuthenticatedScheduleRoute
   '/workspace': typeof AuthenticatedWorkspaceRoute
   '/portfolios/$id': typeof PortfoliosIdRoute
   '/projects/$id': typeof ProjectsIdRoute
@@ -213,8 +300,18 @@ export interface FileRoutesById {
   '/reports': typeof ReportsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/rki': typeof RkiRoute
+  '/_authenticated/activation-live': typeof AuthenticatedActivationLiveRoute
+  '/_authenticated/agent-evidence': typeof AuthenticatedAgentEvidenceRoute
+  '/_authenticated/agents-live': typeof AuthenticatedAgentsLiveRoute
+  '/_authenticated/assurance-live': typeof AuthenticatedAssuranceLiveRoute
   '/_authenticated/audit': typeof AuthenticatedAuditRoute
+  '/_authenticated/delivery-live': typeof AuthenticatedDeliveryLiveRoute
+  '/_authenticated/executive': typeof AuthenticatedExecutiveRoute
+  '/_authenticated/knowledge-facts': typeof AuthenticatedKnowledgeFactsRoute
+  '/_authenticated/knowledge-live': typeof AuthenticatedKnowledgeLiveRoute
   '/_authenticated/members': typeof AuthenticatedMembersRoute
+  '/_authenticated/readiness-live': typeof AuthenticatedReadinessLiveRoute
+  '/_authenticated/schedule': typeof AuthenticatedScheduleRoute
   '/_authenticated/workspace': typeof AuthenticatedWorkspaceRoute
   '/portfolios/$id': typeof PortfoliosIdRoute
   '/projects/$id': typeof ProjectsIdRoute
@@ -239,8 +336,18 @@ export interface FileRouteTypes {
     | '/reports'
     | '/reset-password'
     | '/rki'
+    | '/activation-live'
+    | '/agent-evidence'
+    | '/agents-live'
+    | '/assurance-live'
     | '/audit'
+    | '/delivery-live'
+    | '/executive'
+    | '/knowledge-facts'
+    | '/knowledge-live'
     | '/members'
+    | '/readiness-live'
+    | '/schedule'
     | '/workspace'
     | '/portfolios/$id'
     | '/projects/$id'
@@ -263,8 +370,18 @@ export interface FileRouteTypes {
     | '/reports'
     | '/reset-password'
     | '/rki'
+    | '/activation-live'
+    | '/agent-evidence'
+    | '/agents-live'
+    | '/assurance-live'
     | '/audit'
+    | '/delivery-live'
+    | '/executive'
+    | '/knowledge-facts'
+    | '/knowledge-live'
     | '/members'
+    | '/readiness-live'
+    | '/schedule'
     | '/workspace'
     | '/portfolios/$id'
     | '/projects/$id'
@@ -288,8 +405,18 @@ export interface FileRouteTypes {
     | '/reports'
     | '/reset-password'
     | '/rki'
+    | '/_authenticated/activation-live'
+    | '/_authenticated/agent-evidence'
+    | '/_authenticated/agents-live'
+    | '/_authenticated/assurance-live'
     | '/_authenticated/audit'
+    | '/_authenticated/delivery-live'
+    | '/_authenticated/executive'
+    | '/_authenticated/knowledge-facts'
+    | '/_authenticated/knowledge-live'
     | '/_authenticated/members'
+    | '/_authenticated/readiness-live'
+    | '/_authenticated/schedule'
     | '/_authenticated/workspace'
     | '/portfolios/$id'
     | '/projects/$id'
@@ -428,6 +555,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RkiRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/activation-live': {
+      id: '/_authenticated/activation-live'
+      path: '/activation-live'
+      fullPath: '/activation-live'
+      preLoaderRoute: typeof AuthenticatedActivationLiveRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/agent-evidence': {
+      id: '/_authenticated/agent-evidence'
+      path: '/agent-evidence'
+      fullPath: '/agent-evidence'
+      preLoaderRoute: typeof AuthenticatedAgentEvidenceRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/agents-live': {
+      id: '/_authenticated/agents-live'
+      path: '/agents-live'
+      fullPath: '/agents-live'
+      preLoaderRoute: typeof AuthenticatedAgentsLiveRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/assurance-live': {
+      id: '/_authenticated/assurance-live'
+      path: '/assurance-live'
+      fullPath: '/assurance-live'
+      preLoaderRoute: typeof AuthenticatedAssuranceLiveRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/audit': {
       id: '/_authenticated/audit'
       path: '/audit'
@@ -435,11 +590,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAuditRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/delivery-live': {
+      id: '/_authenticated/delivery-live'
+      path: '/delivery-live'
+      fullPath: '/delivery-live'
+      preLoaderRoute: typeof AuthenticatedDeliveryLiveRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/executive': {
+      id: '/_authenticated/executive'
+      path: '/executive'
+      fullPath: '/executive'
+      preLoaderRoute: typeof AuthenticatedExecutiveRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/knowledge-facts': {
+      id: '/_authenticated/knowledge-facts'
+      path: '/knowledge-facts'
+      fullPath: '/knowledge-facts'
+      preLoaderRoute: typeof AuthenticatedKnowledgeFactsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/knowledge-live': {
+      id: '/_authenticated/knowledge-live'
+      path: '/knowledge-live'
+      fullPath: '/knowledge-live'
+      preLoaderRoute: typeof AuthenticatedKnowledgeLiveRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/members': {
       id: '/_authenticated/members'
       path: '/members'
       fullPath: '/members'
       preLoaderRoute: typeof AuthenticatedMembersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/readiness-live': {
+      id: '/_authenticated/readiness-live'
+      path: '/readiness-live'
+      fullPath: '/readiness-live'
+      preLoaderRoute: typeof AuthenticatedReadinessLiveRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/schedule': {
+      id: '/_authenticated/schedule'
+      path: '/schedule'
+      fullPath: '/schedule'
+      preLoaderRoute: typeof AuthenticatedScheduleRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/workspace': {
@@ -488,14 +685,34 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedActivationLiveRoute: typeof AuthenticatedActivationLiveRoute
+  AuthenticatedAgentEvidenceRoute: typeof AuthenticatedAgentEvidenceRoute
+  AuthenticatedAgentsLiveRoute: typeof AuthenticatedAgentsLiveRoute
+  AuthenticatedAssuranceLiveRoute: typeof AuthenticatedAssuranceLiveRoute
   AuthenticatedAuditRoute: typeof AuthenticatedAuditRoute
+  AuthenticatedDeliveryLiveRoute: typeof AuthenticatedDeliveryLiveRoute
+  AuthenticatedExecutiveRoute: typeof AuthenticatedExecutiveRoute
+  AuthenticatedKnowledgeFactsRoute: typeof AuthenticatedKnowledgeFactsRoute
+  AuthenticatedKnowledgeLiveRoute: typeof AuthenticatedKnowledgeLiveRoute
   AuthenticatedMembersRoute: typeof AuthenticatedMembersRoute
+  AuthenticatedReadinessLiveRoute: typeof AuthenticatedReadinessLiveRoute
+  AuthenticatedScheduleRoute: typeof AuthenticatedScheduleRoute
   AuthenticatedWorkspaceRoute: typeof AuthenticatedWorkspaceRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedActivationLiveRoute: AuthenticatedActivationLiveRoute,
+  AuthenticatedAgentEvidenceRoute: AuthenticatedAgentEvidenceRoute,
+  AuthenticatedAgentsLiveRoute: AuthenticatedAgentsLiveRoute,
+  AuthenticatedAssuranceLiveRoute: AuthenticatedAssuranceLiveRoute,
   AuthenticatedAuditRoute: AuthenticatedAuditRoute,
+  AuthenticatedDeliveryLiveRoute: AuthenticatedDeliveryLiveRoute,
+  AuthenticatedExecutiveRoute: AuthenticatedExecutiveRoute,
+  AuthenticatedKnowledgeFactsRoute: AuthenticatedKnowledgeFactsRoute,
+  AuthenticatedKnowledgeLiveRoute: AuthenticatedKnowledgeLiveRoute,
   AuthenticatedMembersRoute: AuthenticatedMembersRoute,
+  AuthenticatedReadinessLiveRoute: AuthenticatedReadinessLiveRoute,
+  AuthenticatedScheduleRoute: AuthenticatedScheduleRoute,
   AuthenticatedWorkspaceRoute: AuthenticatedWorkspaceRoute,
 }
 
@@ -527,13 +744,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
