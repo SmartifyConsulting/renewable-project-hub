@@ -10,6 +10,8 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ActivationRouteImport } from './routes/activation'
+import { Route as ReadinessRouteImport } from './routes/readiness'
 import { Route as RkiRouteImport } from './routes/rki'
 import { Route as PortfoliosIndexRouteImport } from './routes/portfolios.index'
 import { Route as PortfoliosIdRouteImport } from './routes/portfolios.$id'
@@ -20,6 +22,16 @@ import { Route as RecordsIdRouteImport } from './routes/records.$id'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ActivationRoute = ActivationRouteImport.update({
+  id: '/activation',
+  path: '/activation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReadinessRoute = ReadinessRouteImport.update({
+  id: '/readiness',
+  path: '/readiness',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RkiRoute = RkiRouteImport.update({
@@ -55,6 +67,8 @@ const RecordsIdRoute = RecordsIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/activation': typeof ActivationRoute
+  '/readiness': typeof ReadinessRoute
   '/rki': typeof RkiRoute
   '/portfolios/$id': typeof PortfoliosIdRoute
   '/projects/$id': typeof ProjectsIdRoute
@@ -64,6 +78,8 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/activation': typeof ActivationRoute
+  '/readiness': typeof ReadinessRoute
   '/rki': typeof RkiRoute
   '/portfolios/$id': typeof PortfoliosIdRoute
   '/projects/$id': typeof ProjectsIdRoute
@@ -74,6 +90,8 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/activation': typeof ActivationRoute
+  '/readiness': typeof ReadinessRoute
   '/rki': typeof RkiRoute
   '/portfolios/$id': typeof PortfoliosIdRoute
   '/projects/$id': typeof ProjectsIdRoute
@@ -85,6 +103,8 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/activation'
+    | '/readiness'
     | '/rki'
     | '/portfolios/$id'
     | '/projects/$id'
@@ -94,6 +114,8 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/activation'
+    | '/readiness'
     | '/rki'
     | '/portfolios/$id'
     | '/projects/$id'
@@ -103,6 +125,8 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/activation'
+    | '/readiness'
     | '/rki'
     | '/portfolios/$id'
     | '/projects/$id'
@@ -113,6 +137,8 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ActivationRoute: typeof ActivationRoute
+  ReadinessRoute: typeof ReadinessRoute
   RkiRoute: typeof RkiRoute
   PortfoliosIdRoute: typeof PortfoliosIdRoute
   ProjectsIdRoute: typeof ProjectsIdRoute
@@ -128,6 +154,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/activation': {
+      id: '/activation'
+      path: '/activation'
+      fullPath: '/activation'
+      preLoaderRoute: typeof ActivationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/readiness': {
+      id: '/readiness'
+      path: '/readiness'
+      fullPath: '/readiness'
+      preLoaderRoute: typeof ReadinessRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/rki': {
@@ -177,6 +217,8 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ActivationRoute: ActivationRoute,
+  ReadinessRoute: ReadinessRoute,
   RkiRoute: RkiRoute,
   PortfoliosIdRoute: PortfoliosIdRoute,
   ProjectsIdRoute: ProjectsIdRoute,
