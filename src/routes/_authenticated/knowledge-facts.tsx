@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { WorkspaceHeader, useSignOut } from "@/components/rpos/workspace-header";
 import { mapRpcError } from "@/lib/rpos/auth-config";
 import { parseCandidateFacts } from "@/lib/rpos/knowledge-extraction";
-import { extractPdfCandidates } from "@/lib/rpos/pdf-extract.functions";
+import { extractDocumentCandidates } from "@/lib/rpos/pdf-extract.functions";
 
 export const Route = createFileRoute("/_authenticated/knowledge-facts")({component: FactsPage});
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -77,13 +77,13 @@ function FactsPage(){
    toast.info("Review the extracted text before submitting candidates.");
   }catch{toast.error("File could not be read.");}
  }
- async function extractPdf(){
-  if(!selectedSource?.source_uri.toLowerCase().endsWith(".pdf")){toast.error("Select a registered PDF source.");return;}
+ async function extractDocument(){
+  if(!selectedSource || !/\.(pdf|docx)$/i.test(selectedSource.source_uri)){toast.error("Select a registered PDF or DOCX source.");return;}
   setExtracting(true);
   try{
    const {data:session}=await supabase.auth.getSession();
    if(!session.session?.access_token)throw new Error("Please sign in again.");
-   const result=await extractPdfCandidates({data:{source_id:activeSource},headers:{Authorization:"Bearer "+session.session.access_token}});
+   const result=await extractDocumentCandidates({data:{source_id:activeSource},headers:{Authorization:"Bearer "+session.session.access_token}});
    if(result.source_id!==activeSource)throw new Error("Source changed during extraction.");
    if(!result.candidates.length){toast.info("No supported factual candidates found.");return;}
    setAiDrafts(result.candidates.map(c=>({...c,selected:true})));
@@ -155,12 +155,12 @@ function FactsPage(){
     {selectedSource&&<div className="rounded border p-3 text-sm"><strong>Selected evidence:</strong> {selectedSource.title} · Source review: <strong>{selectedSource.status.replaceAll("_"," ")}</strong><p className="mt-1 break-all text-xs text-muted-foreground">{selectedSource.source_uri}</p><p className="mt-1 text-xs text-muted-foreground">Fact acceptance is independent of source verification. Both must be checked before relying on evidence.</p></div>}
     {canWrite&&<section className="space-y-2 rounded-lg border p-4">
      <h2 className="font-semibold">Stage facts for review</h2>
-     {aiDrafts.length>0&&<div className="space-y-3 rounded border p-3"><h3 className="font-semibold">AI-extracted candidates · verify before saving</h3><p className="text-xs text-muted-foreground">Page labels and excerpts are AI-proposed, not independently confirmed. Compare each with the original PDF.</p>{aiDrafts.map((c,i)=><div key={i} className="space-y-1 rounded border p-2 text-sm"><label className="flex items-start gap-2"><input type="checkbox" checked={c.selected} onChange={e=>setAiDrafts(old=>old.map((x,j)=>j===i?{...x,selected:e.target.checked}:x))}/><span><strong>Include candidate {i+1}</strong></span></label><div className="grid gap-2 sm:grid-cols-2"><label className="text-xs">Fact key<Input aria-label={"Candidate "+(i+1)+" key"} maxLength={120} value={c.key} onChange={e=>setAiDrafts(old=>old.map((x,j)=>j===i?{...x,key:e.target.value}:x))}/></label><label className="text-xs">Fact value<Input aria-label={"Candidate "+(i+1)+" value"} maxLength={4000} value={c.value} onChange={e=>setAiDrafts(old=>old.map((x,j)=>j===i?{...x,value:e.target.value}:x))}/></label></div><label className="block text-xs">Page reference<Input aria-label={"Candidate "+(i+1)+" page"} maxLength={40} value={c.page} onChange={e=>setAiDrafts(old=>old.map((x,j)=>j===i?{...x,page:e.target.value}:x))}/></label><label className="block text-xs">Supporting excerpt<Textarea aria-label={"Candidate "+(i+1)+" excerpt"} maxLength={3500} value={c.excerpt} onChange={e=>setAiDrafts(old=>old.map((x,j)=>j===i?{...x,excerpt:e.target.value}:x))}/></label></div>)}<Button disabled={saving||extracting||draftSource!==activeSource} onClick={saveAiDrafts}>Save selected AI candidates for review</Button></div>}
-     {selectedSource?.source_uri.toLowerCase().endsWith(".pdf")&&<Button variant="outline" disabled={extracting||saving} onClick={extractPdf}>{extracting?"Extracting PDF…":"Suggest facts from registered PDF (AI)"}</Button>}
+     {aiDrafts.length>0&&<div className="space-y-3 rounded border p-3"><h3 className="font-semibold">AI-extracted candidates · verify before saving</h3><p className="text-xs text-muted-foreground">Page labels and excerpts are AI-proposed, not independently confirmed. Compare each with the original document.</p>{aiDrafts.map((c,i)=><div key={i} className="space-y-1 rounded border p-2 text-sm"><label className="flex items-start gap-2"><input type="checkbox" checked={c.selected} onChange={e=>setAiDrafts(old=>old.map((x,j)=>j===i?{...x,selected:e.target.checked}:x))}/><span><strong>Include candidate {i+1}</strong></span></label><div className="grid gap-2 sm:grid-cols-2"><label className="text-xs">Fact key<Input aria-label={"Candidate "+(i+1)+" key"} maxLength={120} value={c.key} onChange={e=>setAiDrafts(old=>old.map((x,j)=>j===i?{...x,key:e.target.value}:x))}/></label><label className="text-xs">Fact value<Input aria-label={"Candidate "+(i+1)+" value"} maxLength={4000} value={c.value} onChange={e=>setAiDrafts(old=>old.map((x,j)=>j===i?{...x,value:e.target.value}:x))}/></label></div><label className="block text-xs">Page reference<Input aria-label={"Candidate "+(i+1)+" page"} maxLength={40} value={c.page} onChange={e=>setAiDrafts(old=>old.map((x,j)=>j===i?{...x,page:e.target.value}:x))}/></label><label className="block text-xs">Supporting excerpt<Textarea aria-label={"Candidate "+(i+1)+" excerpt"} maxLength={3500} value={c.excerpt} onChange={e=>setAiDrafts(old=>old.map((x,j)=>j===i?{...x,excerpt:e.target.value}:x))}/></label></div>)}<Button disabled={saving||extracting||draftSource!==activeSource} onClick={saveAiDrafts}>Save selected AI candidates for review</Button></div>}
+     {selectedSource&&/\.(pdf|docx)$/i.test(selectedSource.source_uri)&&<Button variant="outline" disabled={extracting||saving} onClick={extractDocument}>{extracting?"Extracting document…":"Suggest facts from registered PDF / Word (AI)"}</Button>}
      <Input aria-label="Fact key" placeholder="Fact name (e.g. Grid connection capacity)" value={key} onChange={e=>setKey(e.target.value)}/>
      <Input aria-label="Fact value" placeholder="Fact value" value={value} onChange={e=>setValue(e.target.value)}/>
      <Textarea aria-label="Supporting excerpt" placeholder="Verbatim source excerpt and page reference" value={excerpt} maxLength={4000} onChange={e=>setExcerpt(e.target.value)}/>
-     <p className="text-xs text-muted-foreground">Alternatively paste up to 50 lines of Key: Value text below. Only lines with a colon are staged. PDF and Word parsing are not yet supported.</p>
+     <p className="text-xs text-muted-foreground">Alternatively paste up to 50 lines of Key: Value text below. Only lines with a colon are staged. AI-assisted PDF and DOCX extraction is available for registered documents; other formats require text import.</p>
      <label className="block text-sm">Import text candidates (TXT/CSV, up to 2 MiB)<Input type="file" accept=".txt,.csv" onChange={e=>readTextFile(e.target.files?.[0]??null)}/></label>
      {importName&&<p className="text-xs text-muted-foreground">Draft extracted from {importName}. Verify against the registered source before saving.</p>}
      <Textarea aria-label="Bulk key value lines" placeholder={"Capacity: 150 MW\nConnection voltage: 132 kV"} value={batch} onChange={e=>setBatch(e.target.value)}/>
