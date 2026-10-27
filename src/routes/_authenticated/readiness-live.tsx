@@ -14,7 +14,8 @@ import { WorkspaceHeader, useSignOut } from "@/components/rpos/workspace-header"
 
 export const Route = createFileRoute("/_authenticated/readiness-live")({ component: LiveReadiness });
 
-type GateDecision = { id: number; project_id: string; decision: string; rationale: string; decided_at: string; snapshot_updated_at: string };\ntype Assessment = {
+type GateDecision = { id: number; project_id: string; decision: string; rationale: string; decided_at: string; snapshot_updated_at: string };
+type Assessment = {
   project_id: string; domain_id: string; score: number | null;
   evidence_verified: boolean; hard_stop: boolean; evidence_notes: string;
 };
@@ -32,7 +33,8 @@ async function load(userId: string) {
     supabase.from("portfolios").select("id,org_id"),
     supabase.from("organisation_memberships").select("organisation_id,role").eq("user_id", userId),
     readinessDb.from("readiness_domain_assessments")
-      .select("project_id,domain_id,score,evidence_verified,hard_stop,evidence_notes"),\n    readinessDb.from("readiness_gate_decisions").select("id,project_id,decision,rationale,decided_at,snapshot_updated_at").order("decided_at", { ascending: false }),
+      .select("project_id,domain_id,score,evidence_verified,hard_stop,evidence_notes"),
+    readinessDb.from("readiness_gate_decisions").select("id,project_id,decision,rationale,decided_at,snapshot_updated_at").order("decided_at", { ascending: false }),
   ]);
   const error = projects.error ?? portfolios.error ?? memberships.error ?? assessments.error ?? gates.error;
   if (error) throw error;
@@ -40,7 +42,8 @@ async function load(userId: string) {
     projects: (projects.data ?? []) as Project[],
     portfolios: (portfolios.data ?? []) as Portfolio[],
     memberships: (memberships.data ?? []) as Membership[],
-    assessments: (assessments.data ?? []) as Assessment[],\n    gates: (gates.data ?? []) as GateDecision[],
+    assessments: (assessments.data ?? []) as Assessment[],
+    gates: (gates.data ?? []) as GateDecision[],
   };
 }
 
@@ -181,7 +184,8 @@ function LiveReadiness() {
         )}
         {visibleProjects.map((project) => {
           const orgId = data.portfolios.find((p) => p.id === project.portfolio_id)?.org_id;
-          const canEdit = data.memberships.some((m) => m.organisation_id === orgId && canWriteOrg(m.role));\n          const canDecide = data.memberships.some((m) => m.organisation_id === orgId && ["admin", "director"].includes(m.role));
+          const canEdit = data.memberships.some((m) => m.organisation_id === orgId && canWriteOrg(m.role));
+          const canDecide = data.memberships.some((m) => m.organisation_id === orgId && ["admin", "director"].includes(m.role));
           const records = data.assessments.filter((a) => a.project_id === project.id);
           const completedCount = DOMAINS.filter((domain) => records.some((a) => a.domain_id === domain.id && a.score !== null)).length;
           const verifiedCount = DOMAINS.filter((domain) => records.some((a) => a.domain_id === domain.id && a.evidence_verified)).length;
@@ -215,6 +219,9 @@ function LiveReadiness() {
                     onSaved={() => qc.invalidateQueries({ queryKey: ["readiness-live", user.id] })} />
                 ))}
               </div>
+              <GatePanel projectId={project.id} canDecide={canDecide}
+                decisions={data.gates.filter((g) => g.project_id === project.id)}
+                onSaved={() => qc.invalidateQueries({ queryKey: ["readiness-live", user.id] })} />
             </section>
           );
         })}
