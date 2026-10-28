@@ -1,3 +1,4 @@
+import { useActiveProject } from "@/lib/rpos/active-project";
 import {useState} from "react";
 import {createFileRoute} from "@tanstack/react-router";
 import {useQuery,useQueryClient} from "@tanstack/react-query";
@@ -29,10 +30,10 @@ const empty={title:"",workstream:"Governance",item_type:"task",status:"not_start
 function ActivationPage(){
  const {user}=Route.useRouteContext();const signOut=useSignOut();const qc=useQueryClient();
  const query=useQuery({queryKey:["activation",user.id],queryFn:()=>load(user.id)});
- const [projectId,setProjectId]=useState("");const [editing,setEditing]=useState<string|null>(null);
+ const [projectId,setProjectId]=useActiveProject();const [editing,setEditing]=useState<string|null>(null);
  const [form,setForm]=useState(empty);const [saving,setSaving]=useState(false);
  const [acceptId,setAcceptId]=useState<string|null>(null);const [acceptReason,setAcceptReason]=useState("");
- const data=query.data;const selected=projectId||data?.projects[0]?.id||"";
+ const data=query.data;const selected=(data?.projects.some(p=>p.id===projectId)?projectId:data?.projects[0]?.id)||"";
  const items=data?.items.filter(i=>i.project_id===selected)??[];
  const org=data?.portfolios.find(p=>p.id===data.projects.find(x=>x.id===selected)?.portfolio_id)?.org_id;
  const canEdit=data?.memberships.some(m=>m.organisation_id===org&&canWriteOrg(m.role))??false;
