@@ -1,3 +1,4 @@
+import { useActiveProject } from "@/lib/rpos/active-project";
 import {useState} from "react";
 import {createFileRoute} from "@tanstack/react-router";
 import {useQuery,useQueryClient} from "@tanstack/react-query";
@@ -29,10 +30,10 @@ const blank={record_type:"risk",reference:"",title:"",description:"",status:"ope
 function DeliveryPage(){
  const {user}=Route.useRouteContext();const signOut=useSignOut();const qc=useQueryClient();
  const query=useQuery({queryKey:["delivery",user.id],queryFn:()=>load(user.id)});
- const [projectId,setProjectId]=useState("");const [typeFilter,setTypeFilter]=useState("all");
+ const [projectId,setProjectId]=useActiveProject();const [typeFilter,setTypeFilter]=useState("all");
  const [editing,setEditing]=useState<string|null>(null);const [form,setForm]=useState(blank);
  const [decisionId,setDecisionId]=useState<string|null>(null);const [rationale,setRationale]=useState("");const [saving,setSaving]=useState(false);
- const data=query.data;const selected=projectId||data?.projects[0]?.id||"";
+ const data=query.data;const selected=(data?.projects.some(p=>p.id===projectId)?projectId:data?.projects[0]?.id)||"";
  const records=data?.records.filter(r=>r.project_id===selected&&(typeFilter==="all"||r.record_type===typeFilter))??[];
  const org=data?.portfolios.find(p=>p.id===data.projects.find(x=>x.id===selected)?.portfolio_id)?.org_id;
  const canEdit=data?.memberships.some(m=>m.organisation_id===org&&canWriteOrg(m.role))??false;
