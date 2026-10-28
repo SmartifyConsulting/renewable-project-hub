@@ -40,8 +40,8 @@ function ProjectClosure() {
     db.from("rpos_activation_items").select("status").eq("project_id", id),
     db.from("rpos_delivery_schedule").select("id,status").eq("project_id", id),
     db.from("rpos_assurance_inspections").select("id,result").eq("project_id", id),
-    db.from("rpos_assurance_ncrs").select("id,status").eq("project_id", id),
-    db.from("rpos_assurance_verifications").select("ncr_id").eq("project_id", id),
+    db.from("rpos_assurance_ncrs").select("id,status,created_by,owner_user_id").eq("project_id", id),
+    db.from("rpos_assurance_verifications").select("ncr_id,verified_by,verification_notes").eq("project_id", id),
     db.from("rpos_journey_links").select("source_type,source_id,target_type,target_id").eq("project_id", id)
    ]);
    const error = readiness.error ?? activation.error ?? delivery.error ?? inspections.error ?? ncrs.error ?? verifications.error ?? links.error;
