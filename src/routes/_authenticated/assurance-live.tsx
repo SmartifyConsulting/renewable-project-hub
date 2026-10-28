@@ -1,3 +1,4 @@
+import { useActiveProject } from "@/lib/rpos/active-project";
 import {useState} from "react";
 import {createFileRoute} from "@tanstack/react-router";
 import {useQuery,useQueryClient} from "@tanstack/react-query";
@@ -31,12 +32,12 @@ async function load(userId:string){
 function AssurancePage(){
  const {user}=Route.useRouteContext();const signOut=useSignOut();const qc=useQueryClient();
  const query=useQuery({queryKey:["assurance",user.id],queryFn:()=>load(user.id)});
- const [projectId,setProjectId]=useState("");const [saving,setSaving]=useState(false);
+ const [projectId,setProjectId]=useActiveProject();const [saving,setSaving]=useState(false);
  const [inspection,setInspection]=useState({reference:"",title:"",date:"",discipline:"",result:"pending",findings:""});
  const [ncr,setNcr]=useState({inspectionId:"",reference:"",description:"",severity:"minor",action:"",dueDate:"",owner:""});
  const [actionId,setActionId]=useState<string|null>(null);const [action,setAction]=useState("");const [actionDate,setActionDate]=useState("");const [actionStatus,setActionStatus]=useState("corrective_action");
  const [verifyId,setVerifyId]=useState<string|null>(null);const [verifyNotes,setVerifyNotes]=useState("");
- const data=query.data;const selected=projectId||data?.projects[0]?.id||"";
+ const data=query.data;const selected=(data?.projects.some(p=>p.id===projectId)?projectId:data?.projects[0]?.id)||"";
  const inspections=data?.inspections.filter(i=>i.project_id===selected)??[];
  const ncrs=data?.ncrs.filter(n=>n.project_id===selected)??[];
  const org=data?.portfolios.find(p=>p.id===data.projects.find(x=>x.id===selected)?.portfolio_id)?.org_id;
