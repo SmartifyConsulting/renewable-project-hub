@@ -1,3 +1,4 @@
+import { useActiveProject } from "@/lib/rpos/active-project";
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
@@ -29,7 +30,7 @@ async function load() {
 function ProjectOverview(){
  const {user}=Route.useRouteContext();
  const signOut=useSignOut();
- const [projectId,setProjectId]=useState("");
+ const [projectId,setProjectId]=useActiveProject();
  const q=useQuery({queryKey:["rpos-project-journey",user.id],queryFn:load});
  const d=q.data;
  const project=d?.projects.find(p=>p.id===projectId)??d?.projects[0];
