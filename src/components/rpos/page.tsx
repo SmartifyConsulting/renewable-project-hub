@@ -4,6 +4,7 @@ import { ChevronRight, HelpCircle, TrendingDown, TrendingUp } from "lucide-react
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
 
 export function PageHeader({ crumbs, title, description, actions, help }: { crumbs: string[]; title: string; description?: string; actions?: ReactNode; help?: string }) {
   return (
@@ -69,7 +70,30 @@ export interface ViewDef {
   label: string;
   group?: string;
 }
-export function ViewTabs({ views, value, onChange }: { views: ViewDef[]; value: string; onChange: (id: string) => void }) {
+export function ViewTabs({ views, value, onChange, wrap = false }: { views: ViewDef[]; value: string; onChange: (id: string) => void; wrap?: boolean }) {
+  if (wrap) {
+    return (
+      <div role="tablist" aria-label="Knowledge Intelligence views" className="mb-5 flex min-w-0 flex-wrap items-center gap-1">
+        {views.map((v) => (
+          <Button
+            key={v.id}
+            type="button"
+            role="tab"
+            aria-selected={value === v.id}
+            variant="ghost"
+            size="sm"
+            onClick={() => onChange(v.id)}
+            className={cn(
+              "h-auto max-w-full whitespace-normal px-2.5 py-1.5 text-xs font-semibold",
+              value === v.id ? "bg-navy text-navy-foreground hover:bg-navy hover:text-navy-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground",
+            )}
+          >
+            {v.label}
+          </Button>
+        ))}
+      </div>
+    );
+  }
   const groups: { name?: string; items: ViewDef[] }[] = [];
   for (const v of views) {
     const g = groups.find((x) => x.name === v.group);
