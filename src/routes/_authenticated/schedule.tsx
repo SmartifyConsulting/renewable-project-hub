@@ -7,6 +7,7 @@ import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {supabase} from "@/integrations/supabase/client";
 import {WorkspaceHeader,useSignOut} from "@/components/rpos/workspace-header";
+import {WorkspaceSubnav} from "@/components/rpos/workspace-subnav";
 import {canWriteOrg,mapRpcError} from "@/lib/rpos/auth-config";
 export const Route=createFileRoute("/_authenticated/schedule")({component:SchedulePage});
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -51,6 +52,7 @@ function SchedulePage(){
  return <div className="min-h-screen bg-background"><WorkspaceHeader email={user.email} onSignOut={signOut}/>
  <main className="mx-auto max-w-5xl space-y-5 px-5 py-6">
   <h1 className="text-2xl font-semibold">Delivery schedule</h1>
+  <WorkspaceSubnav area="delivery"/>
   <p className="text-sm text-muted-foreground">Baseline dates are preserved when schedules are updated. Overdue and blocked work appears in the escalation watchlist.</p>
   {query.isLoading&&<p>Loading schedule…</p>}
   {query.error&&<p role="alert" className="text-destructive">Schedule unavailable. Apply migrations 0015–0017.</p>}
