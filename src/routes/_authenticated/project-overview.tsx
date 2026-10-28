@@ -74,8 +74,19 @@ function ProjectOverview(){
    toast.success("Readiness gap transferred to the activation plan. Assign an owner and target day.");
   }catch(e){toast.error(e instanceof Error?e.message:"Could not create activation action");}finally{setCreating("");}
  }
+ const projectLinks=d?.links.filter(x=>x.project_id===project?.id)??[];
+ const completedSchedules=d?.schedules.filter(x=>x.project_id===project?.id&&x.status==="completed")??[];
+ const inspections=d?.inspections.filter(x=>x.project_id===project?.id)??[];
+ const ncrs=d?.ncrs.filter(x=>x.project_id===project?.id)??[];
+ const awaitingInspection=completedSchedules.filter(x=>!projectLinks.some(l=>l.source_type==="delivery_schedule"&&l.source_id===x.id&&l.target_type==="assurance_inspection"));
+ const unverifiedNcrs=ncrs.filter(x=>x.status!=="closed"||!d?.verifications.some(v=>v.ncr_id===x.id&&v.project_id===project?.id));
+ const adverseInspections=inspections.filter(x=>x.result==="fail"||x.result==="conditional");
+ const passedInspections=inspections.filter(x=>x.result==="pass"&&!unverifiedNcrs.some(n=>n.inspection_id===x.id));
  const actions:Action[]=[];
  if(project){
+  if(awaitingInspection.length)actions.push({title:"Inspect completed delivery work",description:`${awaitingInspection.length} completed activities have no formal assurance link.`,to:"/assurance-live",level:"attention"});
+  if(unverifiedNcrs.length)actions.push({title:"Resolve unverified NCRs",description:`${unverifiedNcrs.length} NCRs lack independently verified closure.`,to:"/assurance-live",level:"attention"});
+  if(adverseInspections.length)actions.push({title:"Review adverse inspection findings",description:`${adverseInspections.length} inspections have failed or conditional results.`,to:"/assurance-live",level:"attention"});
   if(sources.length===0)actions.push({title:"Start with project evidence",description:"Register documents so assessments and decisions have a traceable foundation.",to:"/knowledge-live",level:"next"});
   else if(pending>0)actions.push({title:"Review extracted evidence",description:`${pending} fact candidates still await independent review.`,to:"/knowledge-facts",level:"next"});
   if(!gate)actions.push({title:"Complete the readiness decision",description:"Assess the 14 domains and request an authorised gate decision when evidence is sufficient.",to:"/readiness-live",level:"next"});
