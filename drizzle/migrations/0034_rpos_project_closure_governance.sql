@@ -10,11 +10,13 @@ CREATE TABLE IF NOT EXISTS public.rpos_project_closures (
 ALTER TABLE public.rpos_project_closures ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON public.rpos_project_closures FROM PUBLIC,anon;
 GRANT SELECT ON public.rpos_project_closures TO authenticated;
+DROP POLICY IF EXISTS rpos_project_closure_read ON public.rpos_project_closures;
 CREATE POLICY rpos_project_closure_read ON public.rpos_project_closures
  FOR SELECT TO authenticated USING (
  EXISTS (SELECT 1 FROM public.projects p JOIN public.portfolios pf ON pf.id=p.portfolio_id
  JOIN public.organisation_memberships m ON m.organisation_id=pf.org_id
  WHERE p.id=project_id AND m.user_id=auth.uid())
+ OR EXISTS(SELECT 1 FROM public.project_memberships pm WHERE pm.project_id=project_id AND pm.user_id=auth.uid())
 );
 
 CREATE OR REPLACE FUNCTION public.rpos_signoff_project_closure(
@@ -34,6 +36,29 @@ BEGIN
  OR EXISTS(SELECT 1 FROM public.rpos_delivery_schedule WHERE project_id=p_project_id AND status NOT IN ('completed','cancelled'))
  OR EXISTS(SELECT 1 FROM public.rpos_assurance_ncrs WHERE project_id=p_project_id AND status<>'closed')
  THEN RAISE EXCEPTION 'Outstanding work or NCRs prevent closure'; END IF;
+ IF NOT EXISTS(SELECT 1 FROM public.readiness_domain_assessments WHERE project_id=p_project_id)
+ THEN RAISE EXCEPTION 'Readiness assessment required'; END IF;
+ IF EXISTS(SELECT 1 FROM public.readiness_domain_assessments a WHERE a.project_id=p_project_id
+ AND (a.hard_stop OR a.score IS NULL OR a.score<3 OR NOT coalesce(a.evidence_verified,false)))
+ THEN RAISE EXCEPTION 'Unresolved readiness gaps prevent closure'; END IF;
+ IF EXISTS(SELECT 1 FROM public.rpos_delivery_schedule d WHERE d.project_id=p_project_id
+ AND d.status='completed' AND NOT EXISTS(
+ SELECT 1 FROM public.rpos_journey_links l
+ JOIN public.rpos_assurance_inspections i ON i.id=l.target_id
+ WHERE l.project_id=p_project_id AND l.source_type='delivery_schedule'
+ AND l.source_id=d.id::text AND l.target_type='assurance_inspection'
+ AND i.project_id=p_project_id AND i.result='pass'))
+ THEN RAISE EXCEPTION 'Completed delivery activities require passing inspections'; END IF;
+ IF EXISTS(SELECT 1 FROM public.rpos_assurance_inspections i
+ WHERE i.project_id=p_project_id AND i.result IS DISTINCT FROM 'pass')
+ THEN RAISE EXCEPTION 'Unresolved inspection results prevent closure'; END IF;
+ IF EXISTS(SELECT 1 FROM public.rpos_assurance_ncrs n WHERE n.project_id=p_project_id
+ AND NOT EXISTS(SELECT 1 FROM public.rpos_assurance_verifications v
+ WHERE v.ncr_id=n.id AND v.project_id=n.project_id
+ AND v.verified_by IS DISTINCT FROM n.created_by
+ AND (n.owner_user_id IS NULL OR v.verified_by IS DISTINCT FROM n.owner_user_id)
+ AND length(btrim(coalesce(v.verification_notes,'')))>=10))
+ THEN RAISE EXCEPTION 'Independent NCR verification is missing'; END IF;
  INSERT INTO public.rpos_project_closures(project_id,signed_by,signoff_notes,evidence_reference)
  VALUES(p_project_id,v_user,btrim(p_notes),btrim(p_evidence_reference)) RETURNING * INTO v_result;
  INSERT INTO public.audit_events(organisation_id,project_id,actor_user_id,action,entity_type,entity_id,after_state)
