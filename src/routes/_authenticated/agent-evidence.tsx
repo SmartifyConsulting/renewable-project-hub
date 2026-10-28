@@ -6,6 +6,7 @@ import {Button} from "@/components/ui/button";
 import {toast} from "sonner";
 import {supabase} from "@/integrations/supabase/client";
 import {WorkspaceHeader,useSignOut} from "@/components/rpos/workspace-header";
+import {WorkspaceSubnav} from "@/components/rpos/workspace-subnav";
 export const Route=createFileRoute("/_authenticated/agent-evidence")({component:AgentEvidencePage});
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db=supabase as any;
@@ -23,6 +24,7 @@ function AgentEvidencePage(){
  return <div className="min-h-screen bg-background"><WorkspaceHeader email={user.email} onSignOut={signOut}/>
  <main className="mx-auto max-w-5xl space-y-5 px-5 py-6">
  <h1 className="text-2xl font-semibold">Agent Evidence Brief</h1>
+ <WorkspaceSubnav area="agents"/>
  <p className="text-sm text-muted-foreground">Only independently accepted RPOS Knowledge facts are shown. Conflicting values are flagged; AI recommendations use the reviewed evidence and require independent human approval; no decisions are automated.</p>
  <div className="flex flex-wrap gap-3">
  <label className="text-sm">Project <select className="block rounded border bg-background p-2" value={projectId} onChange={e=>setProject(e.target.value)}>{projects.data?.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></label>
