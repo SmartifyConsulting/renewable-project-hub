@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { mapRpcError } from "@/lib/rpos/auth-config";
 import { WorkspaceHeader, useSignOut } from "@/components/rpos/workspace-header";
+import { KnowledgeSubnav } from "@/components/rpos/knowledge-subnav";
 
 export const Route = createFileRoute("/_authenticated/knowledge-live")({ component: KnowledgePage });
 // Database types must be regenerated after migration 0008.
@@ -87,7 +88,8 @@ function KnowledgePage() {
   return <div className="min-h-screen bg-background">
     <WorkspaceHeader email={user.email} onSignOut={signOut}/>
     <main className="mx-auto max-w-5xl space-y-5 px-5 py-6">
-      <h1 className="font-display text-2xl font-semibold">Renewable Knowledge Intelligence</h1>
+      <h1 className="font-display text-2xl font-semibold">Knowledge Intelligence</h1>
+      <KnowledgeSubnav/>
       <p className="text-sm text-muted-foreground">Register project evidence, manage independent reviews and establish a traceable source inventory. Private document upload and evidence review are available. Automated extraction is not yet enabled.</p>
       {query.isLoading && <p>Loading knowledge sources…</p>}
       {query.error && <p role="alert" className="text-destructive">Knowledge registry unavailable. Apply migration 0008 to the database.</p>}
