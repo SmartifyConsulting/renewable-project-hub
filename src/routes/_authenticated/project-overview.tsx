@@ -20,18 +20,19 @@ type Activation = {project_id:string;id:string;notes:string;status:string};
 type Action = { title: string; description: string; to: "/knowledge-live"|"/knowledge-facts"|"/readiness-live"|"/activation-live"|"/delivery-live"|"/schedule"|"/assurance-live"; level: "attention"|"next" };
 
 async function load() {
- const [projects, kpis, sources, facts, gates, assessments, activation] = await Promise.all([
+ const [projects, kpis, sources, facts, gates, assessments, activation, links] = await Promise.all([
   supabase.from("projects").select("id,name,stage,status").order("name"),
   db.from("rpos_executive_project_kpis").select("project_id,activation_total,activation_completed,activation_blocked,schedule_overdue,critical_ncrs,open_risks,pending_changes"),
   db.from("rpos_knowledge_sources").select("project_id,status"),
   db.from("rpos_source_facts").select("project_id,review_status"),
   db.from("readiness_gate_decisions").select("project_id,decision,decided_at").order("decided_at",{ascending:false}),
   db.from("readiness_domain_assessments").select("project_id,domain_id,score,evidence_verified,hard_stop,evidence_notes"),
-  db.from("rpos_activation_items").select("project_id,id,notes,status")
+  db.from("rpos_activation_items").select("project_id,id,notes,status"),
+  db.from("rpos_journey_links").select("project_id,source_type,source_id,target_type,target_id")
  ]);
- const error=projects.error??kpis.error??sources.error??facts.error??gates.error??assessments.error??activation.error;
+ const error=projects.error??kpis.error??sources.error??facts.error??gates.error??assessments.error??activation.error??links.error;
  if(error)throw error;
- return {projects:(projects.data??[]) as Project[],kpis:(kpis.data??[]) as Kpi[],sources:(sources.data??[]) as Source[],facts:(facts.data??[]) as Fact[],gates:(gates.data??[]) as Gate[],assessments:(assessments.data??[]) as Assessment[],activation:(activation.data??[]) as Activation[]};
+ return {projects:(projects.data??[]) as Project[],kpis:(kpis.data??[]) as Kpi[],sources:(sources.data??[]) as Source[],facts:(facts.data??[]) as Fact[],gates:(gates.data??[]) as Gate[],assessments:(assessments.data??[]) as Assessment[],activation:(activation.data??[]) as Activation[],links:(links.data??[]) as {project_id:string;source_type:string;source_id:string;target_type:string;target_id:string}[]};
 }
 
 function ProjectOverview(){
@@ -53,12 +54,14 @@ function ProjectOverview(){
  async function createGapAction(a:Assessment){
   if(!project||creating)return;
   const marker=`[Readiness gap: ${a.domain_id}]`;
-  if(activation.some(x=>x.notes.includes(marker)&&x.status!=="cancelled")){toast.info("An activation action already exists for this readiness gap.");return;}
+  if(activation.some(x=>x.notes.includes(marker)&&x.status!=="cancelled")||d?.links.some(x=>x.project_id===project.id&&x.source_type==="readiness_domain"&&x.source_id===a.domain_id&&x.target_type==="activation_item")){toast.info("An activation action already exists for this readiness gap.");return;}
   const domain=DOMAINS.find(x=>x.id===a.domain_id);
   setCreating(a.domain_id);
   try{
-   const {error}=await db.rpc("rpos_save_activation_item",{p_project_id:project.id,p_title:`Resolve ${domain?.name??a.domain_id} readiness gap`,p_workstream:"Readiness remediation",p_type:"task",p_day:1,p_notes:`${marker} Origin: readiness assessment for project ${project.id}. ${a.hard_stop?"Hard stop. ":""}${a.evidence_verified?"":"Evidence not verified. "}${a.evidence_notes??""}`.slice(0,4000),p_status:"not_started"});
+   const {data:created,error}=await db.rpc("rpos_save_activation_item",{p_project_id:project.id,p_title:`Resolve ${domain?.name??a.domain_id} readiness gap`,p_workstream:"Readiness remediation",p_type:"task",p_day:1,p_notes:`${marker} Origin: readiness assessment for project ${project.id}. ${a.hard_stop?"Hard stop. ":""}${a.evidence_verified?"":"Evidence not verified. "}${a.evidence_notes??""}`.slice(0,4000),p_status:"not_started"});
    if(error)throw error;
+   const {error:linkError}=await db.rpc("rpos_link_journey",{p_project_id:project.id,p_source_type:"readiness_domain",p_source_id:a.domain_id,p_target_type:"activation_item",p_target_id:created.id});
+   if(linkError){await qc.invalidateQueries({queryKey:["rpos-project-journey",user.id]});throw new Error(`Activation task created, but traceability link failed: ${linkError.message}`);}
    await qc.invalidateQueries({queryKey:["rpos-project-journey",user.id]});
    toast.success("Readiness gap transferred to the activation plan. Assign an owner and target day.");
   }catch(e){toast.error(e instanceof Error?e.message:"Could not create activation action");}finally{setCreating("");}
@@ -100,7 +103,7 @@ function ProjectOverview(){
      {actions.length===0?<div className="rounded-lg border p-4 text-sm">No next-action rules triggered by the available records. Review the project workspaces for further activity.</div>:actions.map((a,i)=><article key={i} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-4"><div className="space-y-1"><p className="text-sm font-semibold">{a.level==="attention"?"Needs attention · ":""}{a.title}</p><p className="text-sm text-muted-foreground">{a.description}</p></div><Link className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground" to={a.to}>Open task</Link></article>)}
     </section>
     <section className="space-y-3"><h2 className="text-xl font-semibold">Readiness gaps → Activation actions</h2><p className="text-sm text-muted-foreground">Turn assessed readiness gaps into trackable activation tasks. Each new task includes a reference to its originating readiness domain. Review and assign ownership in Activation.</p>
-     {gaps.length===0?<p className="rounded-lg border p-4 text-sm">No recorded readiness gaps matching the current rules. Unassessed domains may still need evaluation.</p>:gaps.map(a=>{const marker=`[Readiness gap: ${a.domain_id}]`;const linked=activation.find(x=>x.notes.includes(marker)&&x.status!=="cancelled");return <div key={a.domain_id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-4"><div><p className="font-medium">{a.domain_id} · {DOMAINS.find(x=>x.id===a.domain_id)?.name??"Readiness domain"}</p><p className="text-xs text-muted-foreground">Score: {a.score??"Not scored"} · {a.hard_stop?"Hard stop · ":""}{a.evidence_verified?"Evidence marked verified":"Evidence not verified"}</p></div>{linked?<Link className="text-sm text-primary underline" to="/activation-live">View activation action</Link>:<Button size="sm" disabled={!!creating} onClick={()=>createGapAction(a)}>{creating===a.domain_id?"Creating…":"Create activation action"}</Button>}</div>})}
+     {gaps.length===0?<p className="rounded-lg border p-4 text-sm">No recorded readiness gaps matching the current rules. Unassessed domains may still need evaluation.</p>:gaps.map(a=>{const marker=`[Readiness gap: ${a.domain_id}]`;const linked=activation.find(x=>x.notes.includes(marker)&&x.status!=="cancelled"||d?.links.some(l=>l.project_id===project.id&&l.source_type==="readiness_domain"&&l.source_id===a.domain_id&&l.target_id===x.id));return <div key={a.domain_id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-4"><div><p className="font-medium">{a.domain_id} · {DOMAINS.find(x=>x.id===a.domain_id)?.name??"Readiness domain"}</p><p className="text-xs text-muted-foreground">Score: {a.score??"Not scored"} · {a.hard_stop?"Hard stop · ":""}{a.evidence_verified?"Evidence marked verified":"Evidence not verified"}</p></div>{linked?<Link className="text-sm text-primary underline" to="/activation-live">View activation action</Link>:<Button size="sm" disabled={!!creating} onClick={()=>createGapAction(a)}>{creating===a.domain_id?"Creating…":"Create activation action"}</Button>}</div>})}
     </section>
     <section className="space-y-3"><h2 className="text-xl font-semibold">Your project journey</h2><div className="grid gap-3 md:grid-cols-5">{journey.map((step,i)=><Link key={step.name} to={step.to} className="space-y-2 rounded-lg border p-4 hover:bg-muted/40"><p className="text-xs text-muted-foreground">Step {i+1}</p><p className="font-semibold">{step.name}</p><p className="text-xs text-muted-foreground">{step.detail}</p><p className="text-xs font-medium text-primary">{step.ready?"View progress":"Open workspace"}</p></Link>)}</div><p className="text-xs text-muted-foreground">Journey indicators summarise available records; they are not formal stage completion or permission to proceed.</p></section>
     <div className="flex flex-wrap gap-4 text-sm"><Link className="text-primary underline" to="/agents-live">AI assistance</Link><Link className="text-primary underline" to="/notifications">My notifications</Link><Link className="text-primary underline" to="/executive">Executive intelligence</Link><Link className="text-primary underline" to="/audit">Audit history</Link><Link className="text-primary underline" to="/workspace">Manage projects</Link></div>
