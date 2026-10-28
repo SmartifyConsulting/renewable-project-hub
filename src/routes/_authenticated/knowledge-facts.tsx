@@ -1,3 +1,4 @@
+import { useActiveProject } from "@/lib/rpos/active-project";
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -36,7 +37,7 @@ function FactsPage(){
  const signOut=useSignOut();
  const qc=useQueryClient();
  const query=useQuery({queryKey:["knowledge-facts",user.id],queryFn:()=>load(user.id)});
- const [projectId,setProjectId]=useState("");
+ const [projectId,setProjectId]=useActiveProject();
  const [sourceId,setSourceId]=useState("");
  const [key,setKey]=useState("");
  const [value,setValue]=useState("");
@@ -52,7 +53,7 @@ function FactsPage(){
  const [aiDrafts,setAiDrafts]=useState<{key:string;value:string;excerpt:string;page:string;selected:boolean}[]>([]);
  const [draftSource,setDraftSource]=useState("");
  const data=query.data;
- const selected=projectId||data?.projects[0]?.id||"";
+ const selected=(data?.projects.some(p=>p.id===projectId)?projectId:data?.projects[0]?.id)||"";
  const sources=data?.sources.filter(s=>s.project_id===selected)??[];
  const activeSource=sources.some(s=>s.id===sourceId)?sourceId:(sources[0]?.id??"");
  const selectedSource=sources.find(s=>s.id===activeSource);
