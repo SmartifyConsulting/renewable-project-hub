@@ -16,17 +16,18 @@ type Schedule={id:string;project_id:string;title:string;start_date:string;finish
 type Acceptance={item_id:string;project_id:string;accepted_by:string;accepted_at:string;rationale:string};
 type Item={id:string;project_id:string;title:string;workstream:string;item_type:string;status:string;day_number:number;owner_user_id:string|null;depends_on:string|null;notes:string;created_by:string};
 async function load(userId:string){
- const [projects,portfolios,memberships,items,acceptances,schedules]=await Promise.all([
+ const [projects,portfolios,memberships,items,acceptances,schedules,links]=await Promise.all([
   supabase.from("projects").select("id,name,portfolio_id").order("name"),
   supabase.from("portfolios").select("id,org_id"),
   supabase.from("organisation_memberships").select("organisation_id,role").eq("user_id",userId),
   db.from("rpos_activation_items").select("id,project_id,title,workstream,item_type,status,day_number,owner_user_id,depends_on,notes,created_by").order("day_number"),
   db.from("rpos_activation_acceptances").select("item_id,project_id,accepted_by,accepted_at,rationale"),
-  db.from("rpos_delivery_schedule").select("id,project_id,title,start_date,finish_date,status")
+  db.from("rpos_delivery_schedule").select("id,project_id,title,start_date,finish_date,status"),
+  db.from("rpos_journey_links").select("project_id,source_type,source_id,target_type,target_id")
  ]);
- const error=projects.error??portfolios.error??memberships.error??items.error??acceptances.error??schedules.error;
+ const error=projects.error??portfolios.error??memberships.error??items.error??acceptances.error??schedules.error??links.error;
  if(error)throw error;
- return {projects:projects.data??[],portfolios:portfolios.data??[],memberships:memberships.data??[],items:(items.data??[]) as Item[],acceptances:(acceptances.data??[]) as Acceptance[],schedules:(schedules.data??[]) as Schedule[]};
+ return {projects:projects.data??[],portfolios:portfolios.data??[],memberships:memberships.data??[],items:(items.data??[]) as Item[],acceptances:(acceptances.data??[]) as Acceptance[],schedules:(schedules.data??[]) as Schedule[],links:(links.data??[]) as {project_id:string;source_type:string;source_id:string;target_type:string;target_id:string}[]};
 }
 const empty={title:"",workstream:"Governance",item_type:"task",status:"not_started",day_number:1,owner_user_id:"",depends_on:"",notes:""};
 function ActivationPage(){
@@ -58,11 +59,13 @@ function ActivationPage(){
  async function handoff(item:Item){
   if(!scheduleStart||!scheduleFinish||scheduleFinish<scheduleStart){toast.error("Enter a valid start and finish date.");return;}
   const marker=`[ACT:${item.id.slice(0,8)}]`;
-  if(data?.schedules.some(x=>x.project_id===selected&&x.title.startsWith(marker))){toast.error("A linked schedule item already exists.");return;}
+  if(data?.schedules.some(x=>x.project_id===selected&&x.title.startsWith(marker))||data?.links.some(x=>x.project_id===selected&&x.source_type==="activation_item"&&x.source_id===item.id&&x.target_type==="delivery_schedule")){toast.error("A linked schedule item already exists.");return;}
   setSaving(true);
   try{
-   const {error}=await db.rpc("rpos_add_delivery_schedule",{p_project_id:selected,p_title:`${marker} ${item.title}`.slice(0,250),p_start:scheduleStart,p_finish:scheduleFinish});
+   const {data:created,error}=await db.rpc("rpos_add_delivery_schedule",{p_project_id:selected,p_title:`${marker} ${item.title}`.slice(0,250),p_start:scheduleStart,p_finish:scheduleFinish});
    if(error)throw error;
+   const {error:linkError}=await db.rpc("rpos_link_journey",{p_project_id:selected,p_source_type:"activation_item",p_source_id:item.id,p_target_type:"delivery_schedule",p_target_id:created.id});
+   if(linkError){await qc.invalidateQueries({queryKey:["activation",user.id]});throw new Error(`Schedule created, but journey link failed: ${linkError.message}`);}
    setScheduleItem(null);setScheduleStart("");setScheduleFinish("");
    await qc.invalidateQueries({queryKey:["activation",user.id]});
    toast.success("Delivery schedule created from activation item.");
@@ -121,7 +124,7 @@ function ActivationPage(){
       <div className="shrink-0 space-y-2">
        {data.acceptances.some(a=>a.item_id===i.id)&&<p className="text-xs font-medium">Accepted</p>}
        {canEdit&&!data.acceptances.some(a=>a.item_id===i.id)&&<Button size="sm" variant="outline" onClick={()=>edit(i)}>Edit</Button>}
-       {data.schedules.some(x=>x.project_id===selected&&x.title.startsWith(`[ACT:${i.id.slice(0,8)}]`))?<p className="text-xs font-medium text-primary">Linked to delivery schedule</p>:canEdit&&i.status!=="cancelled"&&<><Button size="sm" variant="outline" onClick={()=>setScheduleItem(scheduleItem===i.id?null:i.id)}>Plan delivery</Button>{scheduleItem===i.id&&<div className="w-60 space-y-2 rounded border p-2"><label className="block text-xs">Start date<Input type="date" value={scheduleStart} onChange={e=>setScheduleStart(e.target.value)}/></label><label className="block text-xs">Finish date<Input type="date" min={scheduleStart||undefined} value={scheduleFinish} onChange={e=>setScheduleFinish(e.target.value)}/></label><Button size="sm" disabled={saving||!scheduleStart||!scheduleFinish} onClick={()=>handoff(i)}>Create schedule item</Button></div>}</>}
+       {(data.schedules.some(x=>x.project_id===selected&&x.title.startsWith(`[ACT:${i.id.slice(0,8)}]`))||data.links.some(x=>x.project_id===selected&&x.source_type==="activation_item"&&x.source_id===i.id&&x.target_type==="delivery_schedule"))?<p className="text-xs font-medium text-primary">Linked to delivery schedule</p>:canEdit&&i.status!=="cancelled"&&<><Button size="sm" variant="outline" onClick={()=>setScheduleItem(scheduleItem===i.id?null:i.id)}>Plan delivery</Button>{scheduleItem===i.id&&<div className="w-60 space-y-2 rounded border p-2"><label className="block text-xs">Start date<Input type="date" value={scheduleStart} onChange={e=>setScheduleStart(e.target.value)}/></label><label className="block text-xs">Finish date<Input type="date" min={scheduleStart||undefined} value={scheduleFinish} onChange={e=>setScheduleFinish(e.target.value)}/></label><Button size="sm" disabled={saving||!scheduleStart||!scheduleFinish} onClick={()=>handoff(i)}>Create schedule item</Button></div>}</>}
        {canAccept&&i.item_type==="milestone"&&i.status!=="completed"&&i.created_by!==user.id&&i.owner_user_id!==user.id&&<>
         <Button size="sm" onClick={()=>setAcceptId(acceptId===i.id?null:i.id)}>Accept milestone</Button>
         {acceptId===i.id&&<div className="w-64 space-y-2"><Textarea aria-label="Milestone acceptance rationale" maxLength={4000} value={acceptReason} onChange={e=>setAcceptReason(e.target.value)} placeholder="Acceptance findings and evidence"/><Button disabled={saving} size="sm" onClick={()=>acceptMilestone(i.id)}>Confirm acceptance</Button></div>}
