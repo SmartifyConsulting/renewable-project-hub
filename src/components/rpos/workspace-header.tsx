@@ -12,7 +12,6 @@ const LINKS = [
   { to: "/members", label: "Members" },
   { to: "/readiness-live", label: "Readiness" },
   { to: "/knowledge-live", label: "Knowledge" },
-  { to: "/knowledge-facts", label: "Facts" },
   { to: "/activation-live", label: "Activation" },
   { to: "/delivery-live", label: "Delivery" },
   { to: "/schedule", label: "Schedule" },
