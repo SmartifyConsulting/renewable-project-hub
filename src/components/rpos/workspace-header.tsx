@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
 const LINKS = [
+  { to: "/project-overview", label: "Overview" },
   { to: "/workspace", label: "Projects" },
   { to: "/members", label: "Members" },
   { to: "/readiness-live", label: "Readiness" },
