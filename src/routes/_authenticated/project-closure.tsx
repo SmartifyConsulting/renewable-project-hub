@@ -17,6 +17,7 @@ function ProjectClosure() {
  const [notes, setNotes] = useState("");
  const [evidence, setEvidence] = useState("");
  const [saving, setSaving] = useState(false);
+ const [confirm, setConfirm] = useState(false);
  const qc = useQueryClient();
  const q = useQuery({ queryKey: ["rpos-closures", user.id], queryFn: async () => {
   const [projects, closures] = await Promise.all([
@@ -36,7 +37,13 @@ function ProjectClosure() {
     p_project_id: project.id, p_notes: notes.trim(), p_evidence_reference: evidence.trim()
    });
    if (error) throw error;
-   await qc.invalidateQueries({ queryKey: ["rpos-closures", user.id] });
+   await Promise.all([
+    qc.invalidateQueries({ queryKey: ["rpos-closures", user.id] }),
+    qc.invalidateQueries({ queryKey: ["rpos-project-journey", user.id] })
+   ]);
+   setConfirm(false);
+   setNotes("");
+   setEvidence("");
    toast.success("Project closure formally signed off.");
   } catch (e) {
    toast.error(e instanceof Error ? e.message : "Closure was not approved.");
@@ -52,7 +59,7 @@ function ProjectClosure() {
    {q.isLoading && <p>Loading closure records…</p>}
    {q.error && <p role="alert" className="text-destructive">Closure records unavailable. Check migration 0034 and your access.</p>}
    {q.data && <label className="block text-sm font-medium">Project
-    <select className="mt-1 block w-full rounded-md border bg-background p-3" value={project?.id ?? ""} onChange={e => setProjectId(e.target.value)}>
+    <select className="mt-1 block w-full rounded-md border bg-background p-3" value={project?.id ?? ""} onChange={e => { setProjectId(e.target.value); setConfirm(false); setNotes(""); setEvidence(""); }}>
      {q.data.projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
     </select></label>}
    {project && (closure ? <section className="space-y-3 rounded-lg border p-5">
@@ -69,7 +76,8 @@ function ProjectClosure() {
     <label className="block space-y-1 text-sm font-medium">Closure rationale
      <textarea className="min-h-32 w-full rounded-md border bg-background p-3" value={notes} onChange={e => setNotes(e.target.value)} maxLength={4000} placeholder="Explain the closure decision and evidence reviewed"/>
     </label>
-    <Button disabled={saving || evidence.trim().length < 5 || notes.trim().length < 20} onClick={signoff}>{saving ? "Checking…" : "Approve final project closure"}</Button>
+    <label className="flex items-start gap-2 text-sm"><input type="checkbox" className="mt-1" checked={confirm} onChange={e => setConfirm(e.target.checked)}/><span>I confirm I am authorised to sign off this project and have reviewed the supporting evidence. This action creates a formal, auditable closure record.</span></label>
+    <Button disabled={saving || !confirm || evidence.trim().length < 5 || notes.trim().length < 20} onClick={signoff}>{saving ? "Checking…" : "Approve final project closure"}</Button>
    </section>)}
   </main>
  </div>;
