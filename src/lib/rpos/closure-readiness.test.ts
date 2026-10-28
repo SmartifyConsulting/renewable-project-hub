@@ -6,8 +6,8 @@ const passing = () => ({
  activation: [{ status: "completed" }],
  delivery: [{ id: "schedule-1", status: "completed" }],
  inspections: [{ id: "inspection-1", result: "pass" }],
- ncrs: [{ id: "ncr-1", status: "closed" }],
- verifications: [{ ncr_id: "ncr-1" }],
+ ncrs: [{ id: "ncr-1", status: "closed", created_by: "author", owner_user_id: "owner" }],
+ verifications: [{ ncr_id: "ncr-1", verified_by: "reviewer", verification_notes: "Independently checked and accepted" }],
  links: [{ source_type: "delivery_schedule", source_id: "schedule-1", target_type: "assurance_inspection", target_id: "inspection-1" }]
 });
 
@@ -34,6 +34,13 @@ describe("project closure readiness preview", () => {
  it("blocks unverified or open NCRs", () => {
   expect(evaluateClosureReadiness({ ...passing(), verifications: [] }).some(x => x.label.includes("NCR"))).toBe(true);
   expect(evaluateClosureReadiness({ ...passing(), ncrs: [{ id: "ncr-1", status: "open" }] }).some(x => x.label.includes("NCR"))).toBe(true);
+ });
+ it("rejects self-verification and inadequate verification notes", () => {
+  const data = passing();
+  for (const verified_by of ["author", "owner"]) {
+   expect(evaluateClosureReadiness({ ...data, verifications: [{ ncr_id: "ncr-1", verified_by, verification_notes: "Independently checked" }] }).some(x => x.label.includes("NCR"))).toBe(true);
+  }
+  expect(evaluateClosureReadiness({ ...data, verifications: [{ ncr_id: "ncr-1", verified_by: "reviewer", verification_notes: "too short" }] }).some(x => x.label.includes("NCR"))).toBe(true);
  });
  it("requires a passing inspection linked to each completed schedule", () => {
   expect(evaluateClosureReadiness({ ...passing(), links: [] }).map(x => x.to)).toContain("/traceability");
