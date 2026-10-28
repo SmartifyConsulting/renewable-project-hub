@@ -1,3 +1,4 @@
+import { useActiveProject } from "@/lib/rpos/active-project";
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -32,7 +33,7 @@ function KnowledgePage() {
   const signOut = useSignOut();
   const qc = useQueryClient();
   const query = useQuery({queryKey:["knowledge",user.id],queryFn:()=>load(user.id)});
-  const [projectId,setProjectId] = useState("");
+  const [projectId,setProjectId]=useActiveProject();
   const [title,setTitle] = useState("");
   const [type,setType] = useState("document");
   const [uri,setUri] = useState("");
