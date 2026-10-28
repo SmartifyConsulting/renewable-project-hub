@@ -29,6 +29,39 @@ function ProjectClosure() {
  }});
  const project = q.data?.projects.find(p => p.id === projectId) ?? q.data?.projects[0];
  const closure = q.data?.closures.find((c: any) => c.project_id === project?.id);
+ const checks = useQuery({
+  queryKey: ["rpos-closure-preflight", project?.id],
+  enabled: !!project?.id && !closure,
+  queryFn: async () => {
+   const id = project!.id;
+   const [readiness, activation, delivery, inspections, ncrs, verifications, links] = await Promise.all([
+    db.from("readiness_domain_assessments").select("score,hard_stop,evidence_verified").eq("project_id", id),
+    db.from("rpos_activation_items").select("status").eq("project_id", id),
+    db.from("rpos_delivery_schedule").select("id,status").eq("project_id", id),
+    db.from("rpos_assurance_inspections").select("id,result").eq("project_id", id),
+    db.from("rpos_assurance_ncrs").select("id,status").eq("project_id", id),
+    db.from("rpos_assurance_verifications").select("ncr_id").eq("project_id", id),
+    db.from("rpos_journey_links").select("source_type,source_id,target_type,target_id").eq("project_id", id)
+   ]);
+   const error = readiness.error ?? activation.error ?? delivery.error ?? inspections.error ?? ncrs.error ?? verifications.error ?? links.error;
+   if (error) throw error;
+   const issues: { label: string; to: "/readiness-live" | "/activation-live" | "/schedule" | "/assurance-live" | "/traceability" }[] = [];
+   const assessments = readiness.data ?? [];
+   if (!assessments.length || assessments.some((x: any) => x.hard_stop || x.score == null || x.score < 3 || !x.evidence_verified))
+    issues.push({ label: "Readiness assessment incomplete or unresolved", to: "/readiness-live" });
+   if ((activation.data ?? []).some((x: any) => !["completed", "cancelled"].includes(x.status)))
+    issues.push({ label: "Activation items remain open", to: "/activation-live" });
+   if ((delivery.data ?? []).some((x: any) => !["completed", "cancelled"].includes(x.status)))
+    issues.push({ label: "Delivery activities remain open", to: "/schedule" });
+   if ((inspections.data ?? []).some((x: any) => x.result !== "pass"))
+    issues.push({ label: "Inspections require passing outcomes", to: "/assurance-live" });
+   if ((ncrs.data ?? []).some((x: any) => x.status !== "closed" || !(verifications.data ?? []).some((v: any) => v.ncr_id === x.id)))
+    issues.push({ label: "NCR closure or verification outstanding", to: "/assurance-live" });
+   if ((delivery.data ?? []).some((x: any) => x.status === "completed" && !(links.data ?? []).some((l: any) => l.source_type === "delivery_schedule" && l.source_id === x.id && l.target_type === "assurance_inspection" && (inspections.data ?? []).some((i: any) => i.id === l.target_id && i.result === "pass"))))
+    issues.push({ label: "Completed delivery work lacks linked passing inspection", to: "/traceability" });
+   return issues;
+  }
+ });
  async function signoff() {
   if (!project || saving || closure) return;
   setSaving(true);
@@ -69,6 +102,14 @@ function ProjectClosure() {
     <p className="whitespace-pre-wrap text-sm">{closure.signoff_notes}</p>
    </section> : <section className="space-y-4 rounded-lg border p-5">
     <h2 className="font-semibold">Request final sign-off</h2>
+    <div className="space-y-2 rounded-md border p-4" aria-live="polite">
+     <h3 className="font-medium">Closure readiness preview</h3>
+     {checks.isLoading && <p className="text-sm">Checking project obligations…</p>}
+     {checks.error && <p className="text-sm text-destructive">Unable to load readiness checks. Approval is disabled until checks can be reviewed.</p>}
+     {checks.data && (checks.data.length ? <><p className="text-sm">{checks.data.length} potential blocker(s) identified:</p>
+      <ul className="list-disc space-y-1 pl-5 text-sm">{checks.data.map((issue, index) => <li key={index}>{issue.label} — <Link to={issue.to} className="text-primary underline">Resolve</Link></li>)}</ul></> :
+      <p className="text-sm">No blockers found in the preliminary checks. Final approval remains subject to server-side governance rules.</p>)}
+    </div>
     <p className="text-sm text-muted-foreground">The system checks incomplete activation and delivery activities, unresolved readiness gaps, inspection outcomes, assurance links and independent NCR verification. If any requirement fails, closure is refused and the reason is shown.</p>
     <label className="block space-y-1 text-sm font-medium">Evidence reference
      <input className="w-full rounded-md border bg-background p-3" value={evidence} onChange={e => setEvidence(e.target.value)} maxLength={1000} placeholder="Document ID, signed report reference or evidence URL"/>
@@ -77,7 +118,7 @@ function ProjectClosure() {
      <textarea className="min-h-32 w-full rounded-md border bg-background p-3" value={notes} onChange={e => setNotes(e.target.value)} maxLength={4000} placeholder="Explain the closure decision and evidence reviewed"/>
     </label>
     <label className="flex items-start gap-2 text-sm"><input type="checkbox" className="mt-1" checked={confirm} onChange={e => setConfirm(e.target.checked)}/><span>I confirm I am authorised to sign off this project and have reviewed the supporting evidence. This action creates a formal, auditable closure record.</span></label>
-    <Button disabled={saving || !confirm || evidence.trim().length < 5 || notes.trim().length < 20} onClick={signoff}>{saving ? "Checking…" : "Approve final project closure"}</Button>
+    <Button disabled={saving || !confirm || checks.isLoading || !!checks.error || !checks.data || checks.data.length > 0 || evidence.trim().length < 5 || notes.trim().length < 20} onClick={signoff}>{saving ? "Checking…" : "Approve final project closure"}</Button>
    </section>)}
   </main>
  </div>;
