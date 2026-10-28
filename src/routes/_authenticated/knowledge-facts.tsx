@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { WorkspaceHeader, useSignOut } from "@/components/rpos/workspace-header";
+import { KnowledgeSubnav } from "@/components/rpos/knowledge-subnav";
 import { mapRpcError } from "@/lib/rpos/auth-config";
 import { parseCandidateFacts } from "@/lib/rpos/knowledge-extraction";
 import { extractDocumentCandidates } from "@/lib/rpos/pdf-extract.functions";
@@ -141,7 +142,8 @@ function FactsPage(){
  }
  return <div className="min-h-screen bg-background"><WorkspaceHeader email={user.email} onSignOut={signOut}/>
   <main className="mx-auto max-w-5xl space-y-5 px-5 py-6">
-   <h1 className="text-2xl font-semibold">Knowledge facts & contradictions</h1>
+   <h1 className="text-2xl font-semibold">Knowledge Intelligence</h1>
+   <KnowledgeSubnav/>
    <p className="text-sm text-muted-foreground">Capture evidence-backed facts manually or stage simple Key: Value lines from extracted text. These are untrusted candidates until independently accepted. Conflicts are potential contradictions, not automatic findings.</p>
    {query.isLoading&&<p>Loading facts…</p>}
    {query.error&&<p role="alert" className="text-destructive">Fact registry unavailable. Apply SQL migration 0011.</p>}
