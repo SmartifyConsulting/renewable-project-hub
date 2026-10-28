@@ -33,10 +33,14 @@ export function WorkspaceHeader({ email, onSignOut }: { email?: string | undefin
       <span className="font-display text-sm font-bold">RPOS Workspace</span>
       <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-semibold uppercase text-muted-foreground">Live data</span>
       <Button size="sm" variant="outline" className="ml-auto xl:hidden" aria-label="Toggle navigation" aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}><Menu className="size-4" /></Button>
-      <nav aria-label="Workspace" className={`${menuOpen ? "flex" : "hidden"} order-last w-full flex-wrap gap-1 xl:order-none xl:ml-4 xl:flex xl:w-auto`}>
-        {LINKS.map((l) => (
-          <Link key={l.to} to={l.to} onClick={() => setMenuOpen(false)} className="rounded-md px-2.5 py-1 text-xs font-medium text-muted-foreground hover:bg-muted" activeProps={{ className: "bg-muted text-foreground" }}>{l.label}</Link>
-        ))}
+      <nav aria-label="Workspace" className={`${menuOpen ? "flex" : "hidden"} order-last w-full flex-wrap items-center gap-1 xl:order-none xl:ml-4 xl:flex xl:w-auto`}>
+        {LINKS.filter(l=>["/project-overview","/workspace","/knowledge-live","/readiness-live","/activation-live","/delivery-live","/assurance-live"].includes(l.to)).map(l=><Link key={l.to} to={l.to} onClick={()=>setMenuOpen(false)} className="rounded-md px-2.5 py-1 text-xs font-medium text-muted-foreground hover:bg-muted" activeProps={{className:"bg-muted text-foreground"}}>{l.label}</Link>)}
+        <details className="relative">
+          <summary className="cursor-pointer rounded-md px-2.5 py-1 text-xs font-medium text-muted-foreground hover:bg-muted">Tools & governance</summary>
+          <div className="z-20 mt-1 flex flex-wrap gap-1 rounded-lg border bg-card p-2 shadow-lg xl:absolute xl:right-0 xl:w-80">
+            {LINKS.filter(l=>!["/project-overview","/workspace","/knowledge-live","/readiness-live","/activation-live","/delivery-live","/assurance-live"].includes(l.to)).map(l=><Link key={l.to} to={l.to} onClick={()=>setMenuOpen(false)} className="rounded-md px-2.5 py-2 text-xs text-muted-foreground hover:bg-muted" activeProps={{className:"bg-muted text-foreground"}}>{l.label}</Link>)}
+          </div>
+        </details>
       </nav>
       <span className="hidden max-w-40 truncate text-xs text-muted-foreground lg:inline" title={email}>{email}</span>
       <Button size="sm" variant="outline" onClick={onSignOut}><LogOut className="size-4" /> Sign out</Button>
