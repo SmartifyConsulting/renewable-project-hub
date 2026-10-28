@@ -17,19 +17,20 @@ type Inspection={id:string;project_id:string;reference:string;title:string;inspe
 type Ncr={id:string;project_id:string;inspection_id:string;reference:string;description:string;severity:string;status:string;corrective_action:string;due_date:string|null;created_by:string;owner_user_id:string|null};
 type Verification={ncr_id:string;verified_at:string;verification_notes:string};
 async function load(userId:string){
- const [projects,portfolios,memberships,inspections,ncrs,verifications,schedules]=await Promise.all([
+ const [projects,portfolios,memberships,inspections,ncrs,verifications,schedules,links]=await Promise.all([
   supabase.from("projects").select("id,name,portfolio_id").order("name"),
   supabase.from("portfolios").select("id,org_id"),
   supabase.from("organisation_memberships").select("organisation_id,role").eq("user_id",userId),
   db.from("rpos_assurance_inspections").select("id,project_id,reference,title,inspection_date,discipline,result,findings").order("inspection_date",{ascending:false}),
   db.from("rpos_assurance_ncrs").select("id,project_id,inspection_id,reference,description,severity,status,corrective_action,due_date,created_by,owner_user_id").order("created_at",{ascending:false}),
   db.from("rpos_assurance_verifications").select("ncr_id,verified_at,verification_notes"),
-  db.from("rpos_delivery_schedule").select("id,project_id,title,status,finish_date")
+  db.from("rpos_delivery_schedule").select("id,project_id,title,status,finish_date"),
+  db.from("rpos_journey_links").select("project_id,source_type,source_id,target_type,target_id")
  ]);
- const error=projects.error??portfolios.error??memberships.error??inspections.error??ncrs.error??verifications.error??schedules.error;
+ const error=projects.error??portfolios.error??memberships.error??inspections.error??ncrs.error??verifications.error??schedules.error??links.error;
  if(error)throw error;
  return {projects:projects.data??[],portfolios:portfolios.data??[],memberships:memberships.data??[],
- inspections:(inspections.data??[]) as Inspection[],ncrs:(ncrs.data??[]) as Ncr[],verifications:(verifications.data??[]) as Verification[],schedules:(schedules.data??[]) as Schedule[]};
+ inspections:(inspections.data??[]) as Inspection[],ncrs:(ncrs.data??[]) as Ncr[],verifications:(verifications.data??[]) as Verification[],schedules:(schedules.data??[]) as Schedule[],links:(links.data??[]) as {project_id:string;source_type:string;source_id:string;target_type:string;target_id:string}[]};
 }
 function AssurancePage(){
  const {user}=Route.useRouteContext();const signOut=useSignOut();const qc=useQueryClient();
