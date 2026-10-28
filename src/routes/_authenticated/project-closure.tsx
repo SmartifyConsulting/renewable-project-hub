@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { WorkspaceHeader, useSignOut } from "@/components/rpos/workspace-header";
 import { useActiveProject } from "@/lib/rpos/active-project";
 import { supabase } from "@/integrations/supabase/client";
+import { evaluateClosureReadiness } from "@/lib/rpos/closure-readiness";
 
 export const Route = createFileRoute("/_authenticated/project-closure")({ component: ProjectClosure });
 const db = supabase as any;
@@ -45,21 +46,11 @@ function ProjectClosure() {
    ]);
    const error = readiness.error ?? activation.error ?? delivery.error ?? inspections.error ?? ncrs.error ?? verifications.error ?? links.error;
    if (error) throw error;
-   const issues: { label: string; to: "/readiness-live" | "/activation-live" | "/schedule" | "/assurance-live" | "/traceability" }[] = [];
-   const assessments = readiness.data ?? [];
-   if (!assessments.length || assessments.some((x: any) => x.hard_stop || x.score == null || x.score < 3 || !x.evidence_verified))
-    issues.push({ label: "Readiness assessment incomplete or unresolved", to: "/readiness-live" });
-   if ((activation.data ?? []).some((x: any) => !["completed", "cancelled"].includes(x.status)))
-    issues.push({ label: "Activation items remain open", to: "/activation-live" });
-   if ((delivery.data ?? []).some((x: any) => !["completed", "cancelled"].includes(x.status)))
-    issues.push({ label: "Delivery activities remain open", to: "/schedule" });
-   if ((inspections.data ?? []).some((x: any) => x.result !== "pass"))
-    issues.push({ label: "Inspections require passing outcomes", to: "/assurance-live" });
-   if ((ncrs.data ?? []).some((x: any) => x.status !== "closed" || !(verifications.data ?? []).some((v: any) => v.ncr_id === x.id)))
-    issues.push({ label: "NCR closure or verification outstanding", to: "/assurance-live" });
-   if ((delivery.data ?? []).some((x: any) => x.status === "completed" && !(links.data ?? []).some((l: any) => l.source_type === "delivery_schedule" && l.source_id === x.id && l.target_type === "assurance_inspection" && (inspections.data ?? []).some((i: any) => i.id === l.target_id && i.result === "pass"))))
-    issues.push({ label: "Completed delivery work lacks linked passing inspection", to: "/traceability" });
-   return issues;
+   return evaluateClosureReadiness({
+    assessments: readiness.data ?? [], activation: activation.data ?? [],
+    delivery: delivery.data ?? [], inspections: inspections.data ?? [],
+    ncrs: ncrs.data ?? [], verifications: verifications.data ?? [], links: links.data ?? []
+   });
   }
  });
  async function signoff() {
