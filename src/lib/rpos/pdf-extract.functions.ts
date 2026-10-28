@@ -68,10 +68,10 @@ export const extractDocumentCandidates = createServerFn({ method: "POST" })
    for (const item of parsed.candidates.slice(0,30)) {
     if (!item || typeof item!=="object") continue;
     const row=item as Record<string,unknown>;
-    const key=typeof row.key==="string"?row.key.trim():"";
-    const value=typeof row.value==="string"?row.value.trim():"";
-    const excerpt=typeof row.excerpt==="string"?row.excerpt.trim():"";
-    const page=typeof row.page==="string"?row.page.trim():"";
+    const key=typeof row['key']==="string"?row['key'].trim():"";
+    const value=typeof row['value']==="string"?row['value'].trim():"";
+    const excerpt=typeof row['excerpt']==="string"?row['excerpt'].trim():"";
+    const page=typeof row['page']==="string"?row['page'].trim():"";
     if (key.length<2||key.length>120||!value||value.length>4000||!excerpt||excerpt.length>3500) continue;
     const signature=key.toLowerCase()+"\u0000"+value.toLowerCase();
     if(seen.has(signature))continue;
