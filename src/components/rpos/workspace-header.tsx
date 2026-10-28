@@ -18,6 +18,8 @@ const LINKS = [
   { to: "/schedule", label: "Schedule" },
   { to: "/assurance-live", label: "Assurance" },
   { to: "/executive", label: "Executive" },
+  { to: "/traceability", label: "Traceability" },
+  { to: "/project-closure", label: "Project closure" },
   { to: "/agents-live", label: "AI Agents" },
   { to: "/agent-evidence", label: "Evidence Brief" },
   { to: "/notifications", label: "Notifications" },
