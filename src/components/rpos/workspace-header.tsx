@@ -1,4 +1,5 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { WorkspaceSubnav } from "@/components/rpos/workspace-subnav";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Copy, LogOut, Menu } from "lucide-react";
@@ -26,8 +27,9 @@ const LINKS = [
 
 export function WorkspaceHeader({ email, onSignOut }: { email?: string | undefined; onSignOut: () => void }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const pathname = useRouterState({ select: state => state.location.pathname });
   return (
-    <header className="flex min-h-14 flex-wrap items-center gap-3 border-b bg-card px-5 py-2">
+    <><header className="flex min-h-14 flex-wrap items-center gap-3 border-b bg-card px-5 py-2">
       <span className="grid size-8 place-items-center rounded-md bg-primary font-display text-sm font-bold text-primary-foreground">R</span>
       <span className="font-display text-sm font-bold">RPOS Workspace</span>
       <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-semibold uppercase text-muted-foreground">Live data</span>
@@ -44,6 +46,8 @@ export function WorkspaceHeader({ email, onSignOut }: { email?: string | undefin
       <span className="hidden max-w-40 truncate text-xs text-muted-foreground lg:inline" title={email}>{email}</span>
       <Button size="sm" variant="outline" onClick={onSignOut}><LogOut className="size-4" /> Sign out</Button>
     </header>
+    {pathname === "/delivery-live" && <div className="mx-auto w-full max-w-6xl px-5 pt-4"><WorkspaceSubnav area="delivery"/></div>}
+    </>
   );
 }
 
