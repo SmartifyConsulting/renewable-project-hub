@@ -28,6 +28,8 @@ export const Route = createFileRoute("/rki")({
       { name: "description", content: "Sources, evidence, lineage, knowledge gaps and contradictions that underpin every RPOS decision." },
       { property: "og:title", content: "Knowledge Intelligence (RKI) — RPOS" },
       { property: "og:description", content: "Sources, evidence, lineage, knowledge gaps and contradictions." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Rki,
@@ -40,7 +42,7 @@ function Rki() {
   return (
     <div>
       <PageHeader crumbs={["Knowledge Intelligence"]} title="Renewable Project Knowledge Intelligence" description="The knowledge foundation of RPOS: every fact, finding and decision traces back to a governed source." help="Sources are registered and classified, evidence is extracted and validated, and lineage links evidence to requirements, risks, findings and decisions." />
-      <ViewTabs views={NAV[3].views} value={view} onChange={go} />
+      <ViewTabs wrap views={NAV[3].views.filter((v) => ["dashboard", "sources", "hierarchy", "upload", "evidence", "lineage", "capture"].includes(v.id)).map((v) => v.id === "capture" ? { ...v, label: "Capture & extract" } : v)} value={view} onChange={go} />
       {view === "dashboard" && <Dashboard go={go} />}
       {view === "sources" && <Register type="source" />}
       {view === "hierarchy" && <Hierarchy />}

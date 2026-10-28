@@ -36,8 +36,11 @@ import { Route as AuthenticatedKnowledgeFactsRouteImport } from './routes/_authe
 import { Route as AuthenticatedKnowledgeLiveRouteImport } from './routes/_authenticated/knowledge-live'
 import { Route as AuthenticatedMembersRouteImport } from './routes/_authenticated/members'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
+import { Route as AuthenticatedProjectClosureRouteImport } from './routes/_authenticated/project-closure'
+import { Route as AuthenticatedProjectOverviewRouteImport } from './routes/_authenticated/project-overview'
 import { Route as AuthenticatedReadinessLiveRouteImport } from './routes/_authenticated/readiness-live'
 import { Route as AuthenticatedScheduleRouteImport } from './routes/_authenticated/schedule'
+import { Route as AuthenticatedTraceabilityRouteImport } from './routes/_authenticated/traceability'
 import { Route as AuthenticatedWorkspaceRouteImport } from './routes/_authenticated/workspace'
 import { Route as PortfoliosIndexRouteImport } from './routes/portfolios.index'
 import { Route as PortfoliosIdRouteImport } from './routes/portfolios.$id'
@@ -187,6 +190,18 @@ const AuthenticatedNotificationsRoute =
     path: '/notifications',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedProjectClosureRoute =
+  AuthenticatedProjectClosureRouteImport.update({
+    id: '/project-closure',
+    path: '/project-closure',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedProjectOverviewRoute =
+  AuthenticatedProjectOverviewRouteImport.update({
+    id: '/project-overview',
+    path: '/project-overview',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedReadinessLiveRoute =
   AuthenticatedReadinessLiveRouteImport.update({
     id: '/readiness-live',
@@ -198,6 +213,12 @@ const AuthenticatedScheduleRoute = AuthenticatedScheduleRouteImport.update({
   path: '/schedule',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedTraceabilityRoute =
+  AuthenticatedTraceabilityRouteImport.update({
+    id: '/traceability',
+    path: '/traceability',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedWorkspaceRoute = AuthenticatedWorkspaceRouteImport.update({
   id: '/workspace',
   path: '/workspace',
@@ -256,8 +277,11 @@ export interface FileRoutesByFullPath {
   '/knowledge-live': typeof AuthenticatedKnowledgeLiveRoute
   '/members': typeof AuthenticatedMembersRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
+  '/project-closure': typeof AuthenticatedProjectClosureRoute
+  '/project-overview': typeof AuthenticatedProjectOverviewRoute
   '/readiness-live': typeof AuthenticatedReadinessLiveRoute
   '/schedule': typeof AuthenticatedScheduleRoute
+  '/traceability': typeof AuthenticatedTraceabilityRoute
   '/workspace': typeof AuthenticatedWorkspaceRoute
   '/portfolios/$id': typeof PortfoliosIdRoute
   '/projects/$id': typeof ProjectsIdRoute
@@ -292,8 +316,11 @@ export interface FileRoutesByTo {
   '/knowledge-live': typeof AuthenticatedKnowledgeLiveRoute
   '/members': typeof AuthenticatedMembersRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
+  '/project-closure': typeof AuthenticatedProjectClosureRoute
+  '/project-overview': typeof AuthenticatedProjectOverviewRoute
   '/readiness-live': typeof AuthenticatedReadinessLiveRoute
   '/schedule': typeof AuthenticatedScheduleRoute
+  '/traceability': typeof AuthenticatedTraceabilityRoute
   '/workspace': typeof AuthenticatedWorkspaceRoute
   '/portfolios/$id': typeof PortfoliosIdRoute
   '/projects/$id': typeof ProjectsIdRoute
@@ -330,8 +357,11 @@ export interface FileRoutesById {
   '/_authenticated/knowledge-live': typeof AuthenticatedKnowledgeLiveRoute
   '/_authenticated/members': typeof AuthenticatedMembersRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
+  '/_authenticated/project-closure': typeof AuthenticatedProjectClosureRoute
+  '/_authenticated/project-overview': typeof AuthenticatedProjectOverviewRoute
   '/_authenticated/readiness-live': typeof AuthenticatedReadinessLiveRoute
   '/_authenticated/schedule': typeof AuthenticatedScheduleRoute
+  '/_authenticated/traceability': typeof AuthenticatedTraceabilityRoute
   '/_authenticated/workspace': typeof AuthenticatedWorkspaceRoute
   '/portfolios/$id': typeof PortfoliosIdRoute
   '/projects/$id': typeof ProjectsIdRoute
@@ -368,8 +398,11 @@ export interface FileRouteTypes {
     | '/knowledge-live'
     | '/members'
     | '/notifications'
+    | '/project-closure'
+    | '/project-overview'
     | '/readiness-live'
     | '/schedule'
+    | '/traceability'
     | '/workspace'
     | '/portfolios/$id'
     | '/projects/$id'
@@ -404,8 +437,11 @@ export interface FileRouteTypes {
     | '/knowledge-live'
     | '/members'
     | '/notifications'
+    | '/project-closure'
+    | '/project-overview'
     | '/readiness-live'
     | '/schedule'
+    | '/traceability'
     | '/workspace'
     | '/portfolios/$id'
     | '/projects/$id'
@@ -441,8 +477,11 @@ export interface FileRouteTypes {
     | '/_authenticated/knowledge-live'
     | '/_authenticated/members'
     | '/_authenticated/notifications'
+    | '/_authenticated/project-closure'
+    | '/_authenticated/project-overview'
     | '/_authenticated/readiness-live'
     | '/_authenticated/schedule'
+    | '/_authenticated/traceability'
     | '/_authenticated/workspace'
     | '/portfolios/$id'
     | '/projects/$id'
@@ -665,6 +704,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/project-closure': {
+      id: '/_authenticated/project-closure'
+      path: '/project-closure'
+      fullPath: '/project-closure'
+      preLoaderRoute: typeof AuthenticatedProjectClosureRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/project-overview': {
+      id: '/_authenticated/project-overview'
+      path: '/project-overview'
+      fullPath: '/project-overview'
+      preLoaderRoute: typeof AuthenticatedProjectOverviewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/readiness-live': {
       id: '/_authenticated/readiness-live'
       path: '/readiness-live'
@@ -677,6 +730,13 @@ declare module '@tanstack/react-router' {
       path: '/schedule'
       fullPath: '/schedule'
       preLoaderRoute: typeof AuthenticatedScheduleRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/traceability': {
+      id: '/_authenticated/traceability'
+      path: '/traceability'
+      fullPath: '/traceability'
+      preLoaderRoute: typeof AuthenticatedTraceabilityRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/workspace': {
@@ -737,8 +797,11 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedKnowledgeLiveRoute: typeof AuthenticatedKnowledgeLiveRoute
   AuthenticatedMembersRoute: typeof AuthenticatedMembersRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
+  AuthenticatedProjectClosureRoute: typeof AuthenticatedProjectClosureRoute
+  AuthenticatedProjectOverviewRoute: typeof AuthenticatedProjectOverviewRoute
   AuthenticatedReadinessLiveRoute: typeof AuthenticatedReadinessLiveRoute
   AuthenticatedScheduleRoute: typeof AuthenticatedScheduleRoute
+  AuthenticatedTraceabilityRoute: typeof AuthenticatedTraceabilityRoute
   AuthenticatedWorkspaceRoute: typeof AuthenticatedWorkspaceRoute
 }
 
@@ -755,8 +818,11 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedKnowledgeLiveRoute: AuthenticatedKnowledgeLiveRoute,
   AuthenticatedMembersRoute: AuthenticatedMembersRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
+  AuthenticatedProjectClosureRoute: AuthenticatedProjectClosureRoute,
+  AuthenticatedProjectOverviewRoute: AuthenticatedProjectOverviewRoute,
   AuthenticatedReadinessLiveRoute: AuthenticatedReadinessLiveRoute,
   AuthenticatedScheduleRoute: AuthenticatedScheduleRoute,
+  AuthenticatedTraceabilityRoute: AuthenticatedTraceabilityRoute,
   AuthenticatedWorkspaceRoute: AuthenticatedWorkspaceRoute,
 }
 
