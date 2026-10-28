@@ -21,10 +21,11 @@ type Schedule={project_id:string;id:string;status:string};
 type Inspection={project_id:string;id:string;result:string};
 type Ncr={project_id:string;id:string;inspection_id:string;status:string};
 type Verification={project_id:string;ncr_id:string};
+type Closure={project_id:string;signed_at:string;evidence_reference:string};
 type Action = { title: string; description: string; to: "/knowledge-live"|"/knowledge-facts"|"/readiness-live"|"/activation-live"|"/delivery-live"|"/schedule"|"/assurance-live"; level: "attention"|"next" };
 
 async function load() {
- const [projects, kpis, sources, facts, gates, assessments, activation, links, schedules, inspections, ncrs, verifications] = await Promise.all([
+ const [projects, kpis, sources, facts, gates, assessments, activation, links, schedules, inspections, ncrs, verifications, closures] = await Promise.all([
   supabase.from("projects").select("id,name,stage,status").order("name"),
   db.from("rpos_executive_project_kpis").select("project_id,activation_total,activation_completed,activation_blocked,schedule_overdue,critical_ncrs,open_risks,pending_changes"),
   db.from("rpos_knowledge_sources").select("project_id,status"),
@@ -36,11 +37,12 @@ async function load() {
   db.from("rpos_delivery_schedule").select("project_id,id,status"),
   db.from("rpos_assurance_inspections").select("project_id,id,result"),
   db.from("rpos_assurance_ncrs").select("project_id,id,inspection_id,status"),
-  db.from("rpos_assurance_verifications").select("project_id,ncr_id")
+  db.from("rpos_assurance_verifications").select("project_id,ncr_id"),
+  db.from("rpos_project_closures").select("project_id,signed_at,evidence_reference")
  ]);
- const error=projects.error??kpis.error??sources.error??facts.error??gates.error??assessments.error??activation.error??links.error??schedules.error??inspections.error??ncrs.error??verifications.error;
+ const error=projects.error??kpis.error??sources.error??facts.error??gates.error??assessments.error??activation.error??links.error??schedules.error??inspections.error??ncrs.error??verifications.error??closures.error;
  if(error)throw error;
- return {projects:(projects.data??[]) as Project[],kpis:(kpis.data??[]) as Kpi[],sources:(sources.data??[]) as Source[],facts:(facts.data??[]) as Fact[],gates:(gates.data??[]) as Gate[],assessments:(assessments.data??[]) as Assessment[],activation:(activation.data??[]) as Activation[],links:(links.data??[]) as {project_id:string;source_type:string;source_id:string;target_type:string;target_id:string}[],schedules:(schedules.data??[]) as Schedule[],inspections:(inspections.data??[]) as Inspection[],ncrs:(ncrs.data??[]) as Ncr[],verifications:(verifications.data??[]) as Verification[]};
+ return {projects:(projects.data??[]) as Project[],kpis:(kpis.data??[]) as Kpi[],sources:(sources.data??[]) as Source[],facts:(facts.data??[]) as Fact[],gates:(gates.data??[]) as Gate[],assessments:(assessments.data??[]) as Assessment[],activation:(activation.data??[]) as Activation[],links:(links.data??[]) as {project_id:string;source_type:string;source_id:string;target_type:string;target_id:string}[],schedules:(schedules.data??[]) as Schedule[],inspections:(inspections.data??[]) as Inspection[],ncrs:(ncrs.data??[]) as Ncr[],verifications:(verifications.data??[]) as Verification[],closures:(closures.data??[]) as Closure[]};
 }
 
 function ProjectOverview(){
@@ -53,6 +55,7 @@ function ProjectOverview(){
  const d=q.data;
  const project=d?.projects.find(p=>p.id===projectId)??d?.projects[0];
  const k=d?.kpis.find(x=>x.project_id===project?.id);
+ const closure=d?.closures.find(x=>x.project_id===project?.id);
  const sources=d?.sources.filter(x=>x.project_id===project?.id)??[];
  const facts=d?.facts.filter(x=>x.project_id===project?.id)??[];
  const gate=d?.gates.find(x=>x.project_id===project?.id);
@@ -118,6 +121,7 @@ function ProjectOverview(){
      <div className="rounded-lg border p-4"><p className="text-xs text-muted-foreground">Readiness decision</p><p className="text-lg font-semibold">{gate?.decision??"Not decided"}</p></div>
      <div className="rounded-lg border p-4"><p className="text-xs text-muted-foreground">Outstanding exceptions</p><p className="text-lg font-semibold">{Number(k?.activation_blocked??0)+Number(k?.schedule_overdue??0)+Number(k?.critical_ncrs??0)}</p></div>
     </div>
+    <section className="rounded-lg border p-4"><div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="font-semibold">Final project closure</h2><p className="text-sm text-muted-foreground">{closure?`Signed off ${new Date(closure.signed_at).toLocaleDateString()} · Evidence: ${closure.evidence_reference}`:"Not yet formally signed off. Closure requires authorised approval and completed governance checks."}</p></div><Link to="/project-closure" className="text-sm font-medium text-primary underline">{closure?"View sign-off":"Review closure requirements"}</Link></div></section>
     <section className="space-y-3"><h2 className="text-xl font-semibold">Workflow integrity</h2><p className="text-sm text-muted-foreground">Delivery completion is not assurance clearance. Indicators reflect recorded evidence, not automatic approval.</p><div className="grid gap-3 sm:grid-cols-4"><div className="rounded border p-3"><strong>{completedSchedules.length}</strong><p className="text-xs">Completed delivery activities</p></div><div className="rounded border p-3"><strong>{awaitingInspection.length}</strong><p className="text-xs">Awaiting linked inspection</p></div><div className="rounded border p-3"><strong>{unverifiedNcrs.length}</strong><p className="text-xs">NCRs without verified closure</p></div><div className="rounded border p-3"><strong>{passedInspections.length}</strong><p className="text-xs">Passed inspections without open NCRs</p></div></div><Link className="text-sm text-primary underline" to="/traceability">View traceability</Link></section>
     <section className="space-y-3"><h2 className="text-xl font-semibold">What needs attention next?</h2>
      {actions.length===0?<div className="rounded-lg border p-4 text-sm">No next-action rules triggered by the available records. Review the project workspaces for further activity.</div>:actions.map((a,i)=><article key={i} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-4"><div className="space-y-1"><p className="text-sm font-semibold">{a.level==="attention"?"Needs attention · ":""}{a.title}</p><p className="text-sm text-muted-foreground">{a.description}</p></div><Link className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground" to={a.to}>Open task</Link></article>)}
