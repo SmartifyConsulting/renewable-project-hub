@@ -120,3 +120,4 @@ function AssurancePage(){
    </section>
   </>}
  </main></div>;
+}
