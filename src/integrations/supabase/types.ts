@@ -1332,6 +1332,61 @@ export type Database = {
         }
         Relationships: []
       }
+      rpos_journey_links: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          project_id: string
+          source_id: string
+          source_type: string
+          target_id: string
+          target_type: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          project_id: string
+          source_id: string
+          source_type: string
+          target_id: string
+          target_type: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          project_id?: string
+          source_id?: string
+          source_type?: string
+          target_id?: string
+          target_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rpos_journey_links_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rpos_journey_links_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "rpos_escalation_overview"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "rpos_journey_links_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "rpos_executive_project_kpis"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
       rpos_knowledge_sources: {
         Row: {
           created_at: string
@@ -1416,6 +1471,55 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      rpos_project_closures: {
+        Row: {
+          evidence_reference: string
+          id: string
+          project_id: string
+          signed_at: string
+          signed_by: string
+          signoff_notes: string
+        }
+        Insert: {
+          evidence_reference: string
+          id?: string
+          project_id: string
+          signed_at?: string
+          signed_by: string
+          signoff_notes: string
+        }
+        Update: {
+          evidence_reference?: string
+          id?: string
+          project_id?: string
+          signed_at?: string
+          signed_by?: string
+          signoff_notes?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rpos_project_closures_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: true
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rpos_project_closures_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: true
+            referencedRelation: "rpos_escalation_overview"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "rpos_project_closures_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: true
+            referencedRelation: "rpos_executive_project_kpis"
+            referencedColumns: ["project_id"]
+          },
+        ]
       }
       rpos_readiness_source_links: {
         Row: {
@@ -1774,6 +1878,31 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "readiness_gate_decisions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      rpos_link_journey: {
+        Args: {
+          p_project_id: string
+          p_source_id: string
+          p_source_type: string
+          p_target_id: string
+          p_target_type: string
+        }
+        Returns: {
+          created_at: string
+          created_by: string
+          id: string
+          project_id: string
+          source_id: string
+          source_type: string
+          target_id: string
+          target_type: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "rpos_journey_links"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -2172,6 +2301,27 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "project_memberships"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      rpos_signoff_project_closure: {
+        Args: {
+          p_evidence_reference: string
+          p_notes: string
+          p_project_id: string
+        }
+        Returns: {
+          evidence_reference: string
+          id: string
+          project_id: string
+          signed_at: string
+          signed_by: string
+          signoff_notes: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "rpos_project_closures"
           isOneToOne: true
           isSetofReturn: false
         }
