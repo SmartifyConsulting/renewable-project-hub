@@ -45,7 +45,7 @@ function AssurancePage(){
  const inspections=data?.inspections.filter(i=>i.project_id===selected)??[];
  const ncrs=data?.ncrs.filter(n=>n.project_id===selected)??[];
  const scheduleItems=data?.schedules.filter(x=>x.project_id===selected&&x.status==="completed")??[];
- const inspectedIds=new Set([...(data?.links.filter(x=>x.project_id===selected&&x.source_type==="delivery_schedule"&&x.target_type==="assurance_inspection").map(x=>x.source_id)??[]),...inspections.flatMap(i=>{const match=i.findings.match(/\\[Delivery schedule: ([0-9a-f-]{36})\\]/i);return match?[match[1]]:[];})]);
+  const inspectedIds=new Set(data?.links.filter(x=>x.project_id===selected&&x.source_type==="delivery_schedule"&&x.target_type==="assurance_inspection").map(x=>x.source_id)??[]);
  const org=data?.portfolios.find(p=>p.id===data.projects.find(x=>x.id===selected)?.portfolio_id)?.org_id;
  const canWrite=data?.memberships.some(m=>m.organisation_id===org&&canWriteOrg(m.role))??false;
  const canVerify=data?.memberships.some(m=>m.organisation_id===org&&["admin","director"].includes(m.role))??false;
