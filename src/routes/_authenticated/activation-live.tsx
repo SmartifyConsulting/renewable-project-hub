@@ -12,19 +12,21 @@ import {canWriteOrg,mapRpcError} from "@/lib/rpos/auth-config";
 export const Route=createFileRoute("/_authenticated/activation-live")({component:ActivationPage});
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db=supabase as any;
+type Schedule={id:string;project_id:string;title:string;start_date:string;finish_date:string;status:string};
 type Acceptance={item_id:string;project_id:string;accepted_by:string;accepted_at:string;rationale:string};
 type Item={id:string;project_id:string;title:string;workstream:string;item_type:string;status:string;day_number:number;owner_user_id:string|null;depends_on:string|null;notes:string;created_by:string};
 async function load(userId:string){
- const [projects,portfolios,memberships,items,acceptances]=await Promise.all([
+ const [projects,portfolios,memberships,items,acceptances,schedules]=await Promise.all([
   supabase.from("projects").select("id,name,portfolio_id").order("name"),
   supabase.from("portfolios").select("id,org_id"),
   supabase.from("organisation_memberships").select("organisation_id,role").eq("user_id",userId),
   db.from("rpos_activation_items").select("id,project_id,title,workstream,item_type,status,day_number,owner_user_id,depends_on,notes,created_by").order("day_number"),
-  db.from("rpos_activation_acceptances").select("item_id,project_id,accepted_by,accepted_at,rationale")
+  db.from("rpos_activation_acceptances").select("item_id,project_id,accepted_by,accepted_at,rationale"),
+  db.from("rpos_delivery_schedule").select("id,project_id,title,start_date,finish_date,status")
  ]);
- const error=projects.error??portfolios.error??memberships.error??items.error??acceptances.error;
+ const error=projects.error??portfolios.error??memberships.error??items.error??acceptances.error??schedules.error;
  if(error)throw error;
- return {projects:projects.data??[],portfolios:portfolios.data??[],memberships:memberships.data??[],items:(items.data??[]) as Item[],acceptances:(acceptances.data??[]) as Acceptance[]};
+ return {projects:projects.data??[],portfolios:portfolios.data??[],memberships:memberships.data??[],items:(items.data??[]) as Item[],acceptances:(acceptances.data??[]) as Acceptance[],schedules:(schedules.data??[]) as Schedule[]};
 }
 const empty={title:"",workstream:"Governance",item_type:"task",status:"not_started",day_number:1,owner_user_id:"",depends_on:"",notes:""};
 function ActivationPage(){
@@ -32,6 +34,9 @@ function ActivationPage(){
  const query=useQuery({queryKey:["activation",user.id],queryFn:()=>load(user.id)});
  const [projectId,setProjectId]=useActiveProject();const [editing,setEditing]=useState<string|null>(null);
  const [form,setForm]=useState(empty);const [saving,setSaving]=useState(false);
+ const [scheduleItem,setScheduleItem]=useState<string|null>(null);
+ const [scheduleStart,setScheduleStart]=useState("");
+ const [scheduleFinish,setScheduleFinish]=useState("");
  const [acceptId,setAcceptId]=useState<string|null>(null);const [acceptReason,setAcceptReason]=useState("");
  const data=query.data;const selected=(data?.projects.some(p=>p.id===projectId)?projectId:data?.projects[0]?.id)||"";
  const items=data?.items.filter(i=>i.project_id===selected)??[];
@@ -48,6 +53,19 @@ function ActivationPage(){
   try{const {error}=await db.rpc("rpos_accept_activation_milestone",{p_item_id:itemId,p_rationale:acceptReason.trim()});
    if(error)throw error;
    setAcceptId(null);setAcceptReason("");await qc.invalidateQueries({queryKey:["activation",user.id]});toast.success("Milestone independently accepted");
+  }catch(e){toast.error(mapRpcError(e));}finally{setSaving(false);}
+ }
+ async function handoff(item:Item){
+  if(!scheduleStart||!scheduleFinish||scheduleFinish<scheduleStart){toast.error("Enter a valid start and finish date.");return;}
+  const marker=`[ACT:${item.id.slice(0,8)}]`;
+  if(data?.schedules.some(x=>x.project_id===selected&&x.title.startsWith(marker))){toast.error("A linked schedule item already exists.");return;}
+  setSaving(true);
+  try{
+   const {error}=await db.rpc("rpos_add_delivery_schedule",{p_project_id:selected,p_title:`${marker} ${item.title}`.slice(0,250),p_start:scheduleStart,p_finish:scheduleFinish});
+   if(error)throw error;
+   setScheduleItem(null);setScheduleStart("");setScheduleFinish("");
+   await qc.invalidateQueries({queryKey:["activation",user.id]});
+   toast.success("Delivery schedule created from activation item.");
   }catch(e){toast.error(mapRpcError(e));}finally{setSaving(false);}
  }
  async function save(){
@@ -103,6 +121,7 @@ function ActivationPage(){
       <div className="shrink-0 space-y-2">
        {data.acceptances.some(a=>a.item_id===i.id)&&<p className="text-xs font-medium">Accepted</p>}
        {canEdit&&!data.acceptances.some(a=>a.item_id===i.id)&&<Button size="sm" variant="outline" onClick={()=>edit(i)}>Edit</Button>}
+       {data.schedules.some(x=>x.project_id===selected&&x.title.startsWith(`[ACT:${i.id.slice(0,8)}]`))?<p className="text-xs font-medium text-primary">Linked to delivery schedule</p>:canEdit&&i.status!=="cancelled"&&<><Button size="sm" variant="outline" onClick={()=>setScheduleItem(scheduleItem===i.id?null:i.id)}>Plan delivery</Button>{scheduleItem===i.id&&<div className="w-60 space-y-2 rounded border p-2"><label className="block text-xs">Start date<Input type="date" value={scheduleStart} onChange={e=>setScheduleStart(e.target.value)}/></label><label className="block text-xs">Finish date<Input type="date" min={scheduleStart||undefined} value={scheduleFinish} onChange={e=>setScheduleFinish(e.target.value)}/></label><Button size="sm" disabled={saving||!scheduleStart||!scheduleFinish} onClick={()=>handoff(i)}>Create schedule item</Button></div>}</>}
        {canAccept&&i.item_type==="milestone"&&i.status!=="completed"&&i.created_by!==user.id&&i.owner_user_id!==user.id&&<>
         <Button size="sm" onClick={()=>setAcceptId(acceptId===i.id?null:i.id)}>Accept milestone</Button>
         {acceptId===i.id&&<div className="w-64 space-y-2"><Textarea aria-label="Milestone acceptance rationale" maxLength={4000} value={acceptReason} onChange={e=>setAcceptReason(e.target.value)} placeholder="Acceptance findings and evidence"/><Button disabled={saving} size="sm" onClick={()=>acceptMilestone(i.id)}>Confirm acceptance</Button></div>}
