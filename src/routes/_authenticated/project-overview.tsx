@@ -17,10 +17,14 @@ type Source = { project_id: string; status: string };
 type Gate = { project_id: string; decision: string; decided_at: string };
 type Assessment = { project_id:string;domain_id:string;score:number|null;evidence_verified:boolean;hard_stop:boolean;evidence_notes:string };
 type Activation = {project_id:string;id:string;notes:string;status:string};
+type Schedule={project_id:string;id:string;status:string};
+type Inspection={project_id:string;id:string;result:string};
+type Ncr={project_id:string;id:string;inspection_id:string;status:string};
+type Verification={project_id:string;ncr_id:string};
 type Action = { title: string; description: string; to: "/knowledge-live"|"/knowledge-facts"|"/readiness-live"|"/activation-live"|"/delivery-live"|"/schedule"|"/assurance-live"; level: "attention"|"next" };
 
 async function load() {
- const [projects, kpis, sources, facts, gates, assessments, activation, links] = await Promise.all([
+ const [projects, kpis, sources, facts, gates, assessments, activation, links, schedules, inspections, ncrs, verifications] = await Promise.all([
   supabase.from("projects").select("id,name,stage,status").order("name"),
   db.from("rpos_executive_project_kpis").select("project_id,activation_total,activation_completed,activation_blocked,schedule_overdue,critical_ncrs,open_risks,pending_changes"),
   db.from("rpos_knowledge_sources").select("project_id,status"),
@@ -28,11 +32,15 @@ async function load() {
   db.from("readiness_gate_decisions").select("project_id,decision,decided_at").order("decided_at",{ascending:false}),
   db.from("readiness_domain_assessments").select("project_id,domain_id,score,evidence_verified,hard_stop,evidence_notes"),
   db.from("rpos_activation_items").select("project_id,id,notes,status"),
-  db.from("rpos_journey_links").select("project_id,source_type,source_id,target_type,target_id")
+  db.from("rpos_journey_links").select("project_id,source_type,source_id,target_type,target_id"),
+  db.from("rpos_delivery_schedule").select("project_id,id,status"),
+  db.from("rpos_assurance_inspections").select("project_id,id,result"),
+  db.from("rpos_assurance_ncrs").select("project_id,id,inspection_id,status"),
+  db.from("rpos_assurance_verifications").select("project_id,ncr_id")
  ]);
- const error=projects.error??kpis.error??sources.error??facts.error??gates.error??assessments.error??activation.error??links.error;
+ const error=projects.error??kpis.error??sources.error??facts.error??gates.error??assessments.error??activation.error??links.error??schedules.error??inspections.error??ncrs.error??verifications.error;
  if(error)throw error;
- return {projects:(projects.data??[]) as Project[],kpis:(kpis.data??[]) as Kpi[],sources:(sources.data??[]) as Source[],facts:(facts.data??[]) as Fact[],gates:(gates.data??[]) as Gate[],assessments:(assessments.data??[]) as Assessment[],activation:(activation.data??[]) as Activation[],links:(links.data??[]) as {project_id:string;source_type:string;source_id:string;target_type:string;target_id:string}[]};
+ return {projects:(projects.data??[]) as Project[],kpis:(kpis.data??[]) as Kpi[],sources:(sources.data??[]) as Source[],facts:(facts.data??[]) as Fact[],gates:(gates.data??[]) as Gate[],assessments:(assessments.data??[]) as Assessment[],activation:(activation.data??[]) as Activation[],links:(links.data??[]) as {project_id:string;source_type:string;source_id:string;target_type:string;target_id:string}[],schedules:(schedules.data??[]) as Schedule[],inspections:(inspections.data??[]) as Inspection[],ncrs:(ncrs.data??[]) as Ncr[],verifications:(verifications.data??[]) as Verification[]};
 }
 
 function ProjectOverview(){
