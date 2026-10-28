@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useActiveProject } from "@/lib/rpos/active-project";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -183,7 +184,7 @@ function LiveReadiness() {
   const qc = useQueryClient();
   const query = useQuery({ queryKey: ["readiness-live", user.id], queryFn: () => load(user.id) });
   const data = query.data;
-  const [selectedProject, setSelectedProject] = useState<string>("");
+  const [selectedProject, setSelectedProject] = useActiveProject();
   const visibleProjects = data?.projects.filter((p) => !selectedProject || p.id === selectedProject) ?? [];
   return (
     <div className="min-h-screen bg-background">
