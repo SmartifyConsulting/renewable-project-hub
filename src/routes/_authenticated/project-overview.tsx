@@ -1,7 +1,10 @@
 import { useActiveProject } from "@/lib/rpos/active-project";
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { DOMAINS } from "@/lib/rpos/config";
 import { supabase } from "@/integrations/supabase/client";
 import { WorkspaceHeader, useSignOut } from "@/components/rpos/workspace-header";
 
@@ -12,24 +15,30 @@ type Kpi = { project_id: string; activation_total: number; activation_completed:
 type Fact = { project_id: string; review_status: string };
 type Source = { project_id: string; status: string };
 type Gate = { project_id: string; decision: string; decided_at: string };
+type Assessment = { project_id:string;domain_id:string;score:number|null;evidence_verified:boolean;hard_stop:boolean;evidence_notes:string };
+type Activation = {project_id:string;id:string;notes:string;status:string};
 type Action = { title: string; description: string; to: "/knowledge-live"|"/knowledge-facts"|"/readiness-live"|"/activation-live"|"/delivery-live"|"/schedule"|"/assurance-live"; level: "attention"|"next" };
 
 async function load() {
- const [projects, kpis, sources, facts, gates] = await Promise.all([
+ const [projects, kpis, sources, facts, gates, assessments, activation] = await Promise.all([
   supabase.from("projects").select("id,name,stage,status").order("name"),
   db.from("rpos_executive_project_kpis").select("project_id,activation_total,activation_completed,activation_blocked,schedule_overdue,critical_ncrs,open_risks,pending_changes"),
   db.from("rpos_knowledge_sources").select("project_id,status"),
   db.from("rpos_source_facts").select("project_id,review_status"),
-  db.from("readiness_gate_decisions").select("project_id,decision,decided_at").order("decided_at",{ascending:false})
+  db.from("readiness_gate_decisions").select("project_id,decision,decided_at").order("decided_at",{ascending:false}),
+  db.from("readiness_domain_assessments").select("project_id,domain_id,score,evidence_verified,hard_stop,evidence_notes"),
+  db.from("rpos_activation_items").select("project_id,id,notes,status")
  ]);
- const error=projects.error??kpis.error??sources.error??facts.error??gates.error;
+ const error=projects.error??kpis.error??sources.error??facts.error??gates.error??assessments.error??activation.error;
  if(error)throw error;
- return {projects:(projects.data??[]) as Project[],kpis:(kpis.data??[]) as Kpi[],sources:(sources.data??[]) as Source[],facts:(facts.data??[]) as Fact[],gates:(gates.data??[]) as Gate[]};
+ return {projects:(projects.data??[]) as Project[],kpis:(kpis.data??[]) as Kpi[],sources:(sources.data??[]) as Source[],facts:(facts.data??[]) as Fact[],gates:(gates.data??[]) as Gate[],assessments:(assessments.data??[]) as Assessment[],activation:(activation.data??[]) as Activation[]};
 }
 
 function ProjectOverview(){
  const {user}=Route.useRouteContext();
  const signOut=useSignOut();
+ const qc=useQueryClient();
+ const [creating,setCreating]=useState("");
  const [projectId,setProjectId]=useActiveProject();
  const q=useQuery({queryKey:["rpos-project-journey",user.id],queryFn:load});
  const d=q.data;
@@ -39,6 +48,21 @@ function ProjectOverview(){
  const facts=d?.facts.filter(x=>x.project_id===project?.id)??[];
  const gate=d?.gates.find(x=>x.project_id===project?.id);
  const pending=facts.filter(x=>x.review_status==="pending").length;
+ const gaps=d?.assessments.filter(a=>a.project_id===project?.id&&(a.hard_stop||a.score===null||a.score<3||!a.evidence_verified))??[];
+ const activation=d?.activation.filter(a=>a.project_id===project?.id)??[];
+ async function createGapAction(a:Assessment){
+  if(!project||creating)return;
+  const marker=`[Readiness gap: ${a.domain_id}]`;
+  if(activation.some(x=>x.notes.includes(marker)&&x.status!=="cancelled")){toast.info("An activation action already exists for this readiness gap.");return;}
+  const domain=DOMAINS.find(x=>x.id===a.domain_id);
+  setCreating(a.domain_id);
+  try{
+   const {error}=await db.rpc("rpos_save_activation_item",{p_project_id:project.id,p_title:`Resolve ${domain?.name??a.domain_id} readiness gap`,p_workstream:"Readiness remediation",p_type:"task",p_day:1,p_notes:`${marker} Origin: readiness assessment for project ${project.id}. ${a.hard_stop?"Hard stop. ":""}${a.evidence_verified?"":"Evidence not verified. "}${a.evidence_notes??""}`.slice(0,4000),p_status:"not_started"});
+   if(error)throw error;
+   await qc.invalidateQueries({queryKey:["rpos-project-journey",user.id]});
+   toast.success("Readiness gap transferred to the activation plan. Assign an owner and target day.");
+  }catch(e){toast.error(e instanceof Error?e.message:"Could not create activation action");}finally{setCreating("");}
+ }
  const actions:Action[]=[];
  if(project){
   if(sources.length===0)actions.push({title:"Start with project evidence",description:"Register documents so assessments and decisions have a traceable foundation.",to:"/knowledge-live",level:"next"});
@@ -74,6 +98,9 @@ function ProjectOverview(){
     </div>
     <section className="space-y-3"><h2 className="text-xl font-semibold">What needs attention next?</h2>
      {actions.length===0?<div className="rounded-lg border p-4 text-sm">No next-action rules triggered by the available records. Review the project workspaces for further activity.</div>:actions.map((a,i)=><article key={i} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-4"><div className="space-y-1"><p className="text-sm font-semibold">{a.level==="attention"?"Needs attention · ":""}{a.title}</p><p className="text-sm text-muted-foreground">{a.description}</p></div><Link className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground" to={a.to}>Open task</Link></article>)}
+    </section>
+    <section className="space-y-3"><h2 className="text-xl font-semibold">Readiness gaps → Activation actions</h2><p className="text-sm text-muted-foreground">Turn assessed readiness gaps into trackable activation tasks. Each new task includes a reference to its originating readiness domain. Review and assign ownership in Activation.</p>
+     {gaps.length===0?<p className="rounded-lg border p-4 text-sm">No recorded readiness gaps matching the current rules. Unassessed domains may still need evaluation.</p>:gaps.map(a=>{const marker=`[Readiness gap: ${a.domain_id}]`;const linked=activation.find(x=>x.notes.includes(marker)&&x.status!=="cancelled");return <div key={a.domain_id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-4"><div><p className="font-medium">{a.domain_id} · {DOMAINS.find(x=>x.id===a.domain_id)?.name??"Readiness domain"}</p><p className="text-xs text-muted-foreground">Score: {a.score??"Not scored"} · {a.hard_stop?"Hard stop · ":""}{a.evidence_verified?"Evidence marked verified":"Evidence not verified"}</p></div>{linked?<Link className="text-sm text-primary underline" to="/activation-live">View activation action</Link>:<Button size="sm" disabled={!!creating} onClick={()=>createGapAction(a)}>{creating===a.domain_id?"Creating…":"Create activation action"}</Button>}</div>})}
     </section>
     <section className="space-y-3"><h2 className="text-xl font-semibold">Your project journey</h2><div className="grid gap-3 md:grid-cols-5">{journey.map((step,i)=><Link key={step.name} to={step.to} className="space-y-2 rounded-lg border p-4 hover:bg-muted/40"><p className="text-xs text-muted-foreground">Step {i+1}</p><p className="font-semibold">{step.name}</p><p className="text-xs text-muted-foreground">{step.detail}</p><p className="text-xs font-medium text-primary">{step.ready?"View progress":"Open workspace"}</p></Link>)}</div><p className="text-xs text-muted-foreground">Journey indicators summarise available records; they are not formal stage completion or permission to proceed.</p></section>
     <div className="flex flex-wrap gap-4 text-sm"><Link className="text-primary underline" to="/agents-live">AI assistance</Link><Link className="text-primary underline" to="/notifications">My notifications</Link><Link className="text-primary underline" to="/executive">Executive intelligence</Link><Link className="text-primary underline" to="/audit">Audit history</Link><Link className="text-primary underline" to="/workspace">Manage projects</Link></div>
